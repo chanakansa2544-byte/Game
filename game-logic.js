@@ -262,13 +262,21 @@ function updateUI() {
     document.getElementById('shop-gold').innerText = gold;
     document.getElementById('display-shield').innerText = shields;
     
-    let rank = "Bronze";
-    if (stars >= 4) rank = "Silver";
-    if (stars >= 8) rank = "Gold";
-    if (stars >= 12) rank = "Platinum";
-    if (stars >= 16) rank = "Diamond";
-    if (stars >= 20) rank = "Conqueror";
-    document.getElementById('display-rank').innerText = rank;
+   let rank = "Bronze";
+
+if (stars >= 50) {
+    rank = "Conqueror";
+} else if (stars >= 30) {
+    rank = "Diamond";
+} else if (stars >= 20) {
+    rank = "Platinum";
+} else if (stars >= 15) {
+    rank = "Gold";
+} else if (stars >= 10) {
+    rank = "Silver";
+}
+
+document.getElementById('display-rank').innerText = rank;
 }
 
 window.toggleShop = function() {
