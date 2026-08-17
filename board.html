@@ -1,3 +1,233 @@
+
+Friday 2:08 PM
+
+pc-game-new_verion.zip
+Zip Archive
+ผมอยากได้หน้า UX UI ของเกมเว็ปนี้ให้มันดีกว่านี้ ให้ไม่เหมือนกับใช้AI ทำงาน
+
+มันมีบ้างส่วนที่มันไม่สมส่วน แก้ได้ไหม
+
+Generated image: Dark PC Detective Service Bay Dashboard
+
+
+Edit
+
+
+f912c40c-1880-4355-9bad-2a78baea0177.png
+ข้อมูลผมไม่ขึ้นกระดานคะแนน
+
+beb02cd1-3723-4fd5-9c4b-02abe319d679.png
+ผมใช้อันนี้นะ
+
+ได้ครับ งั้นใช้เกณฑ์นี้เป็นมาตรฐานเดียวกัน:
+
+Bronze       0–9
+Silver      10–14
+Gold        15–19
+Platinum    20–29
+Diamond     30–49
+Conqueror   50+
+ดังนั้น board.html ที่คุณมีอยู่ตอนนี้ถูกแล้ว ไม่ต้องแก้ getRankDisplay() เพราะใช้เกณฑ์นี้อยู่แล้ว
+
+แต่ต้องแก้ game-logic.js ให้ตรงกับ Board ด้วย
+
+หาใน game-logic.js ตรงฟังก์ชัน updateUI() ที่มี:
+
+let rank = "Bronze";
+if (stars >= 4) rank = "Silver";
+if (stars >= 8) rank = "Gold";
+if (stars >= 12) rank = "Platinum";
+if (stars >= 16) rank = "Diamond";
+if (stars >= 20) rank = "Conqueror";
+
+document.getElementById('display-rank').innerText = rank;
+ให้ ลบส่วนนี้แล้ววางอันนี้แทน:
+
+let rank = "Bronze";
+
+if (stars >= 50) {
+    rank = "Conqueror";
+} else if (stars >= 30) {
+    rank = "Diamond";
+} else if (stars >= 20) {
+    rank = "Platinum";
+} else if (stars >= 15) {
+    rank = "Gold";
+} else if (stars >= 10) {
+    rank = "Silver";
+}
+
+document.getElementById('display-rank').innerText = rank;
+หลังแก้แล้วทั้ง ในเกมและ Leaderboard จะตรงกัน:
+
+ดาว	Rank
+0–9 ⭐	🥉 Bronze
+10–14 ⭐	🥈 Silver
+15–19 ⭐	🥇 Gold
+20–29 ⭐	🔮 Platinum
+30–49 ⭐	💎 Diamond
+50+ ⭐	👑 Conqueror
+ส่วน board.html ของคุณที่ผมตรวจล่าสุดมีเกณฑ์ 10/15/20/30/50 อยู่แล้ว จึงไม่ต้องเปลี่ยนส่วน Rank ครับ
+
+ยังต้องแก้ board.html เรื่องรอ Firebase Auth ตามที่บอกก่อนหน้า เพราะอันนั้นเกี่ยวกับปัญหาคะแนนไม่ขึ้นโดยตรงครับ.
+
+
+ส่วนที่ต้องแก้ เขียนเป็นโค้ดพร้อมใช้งานให้ผม
+
+ได้ครับ ผมสรุปให้เป็น โค้ดพร้อมใช้เฉพาะส่วนที่ต้องแก้ ตามเกณฑ์ Rank ที่คุณยืนยัน และแก้เรื่อง Leaderboard ให้รอ Firebase Auth ก่อนอ่านข้อมูลด้วย
+
+มี 2 ไฟล์ที่ต้องแก้คือ board.html กับ game-logic.js
+
+board.html
+ในไฟล์ board.html ให้หา function getRankDisplay(stars) แล้วใช้เวอร์ชันนี้ได้เลย:
+
+function getRankDisplay(stars) {
+    stars = Number(stars) || 0;
+
+    if (stars >= 50) {
+        return `<span class="rank-icon">👑</span> Conqueror`;
+    }
+
+    if (stars >= 30) {
+        return `<span class="rank-icon">💎</span> Diamond`;
+    }
+
+    if (stars >= 20) {
+        return `<span class="rank-icon">🔮</span> Platinum`;
+    }
+
+    if (stars >= 15) {
+        return `<span class="rank-icon">🥇</span> Gold`;
+    }
+
+    if (stars >= 10) {
+        return `<span class="rank-icon">🥈</span> Silver`;
+    }
+
+    return `<span class="rank-icon">🥉</span> Bronze`;
+}
+จากนั้นหา:
+
+startLeaderboard();
+แล้ว ลบบรรทัดนั้นออก เปลี่ยนเป็น:
+
+ensureAnonymousAuth()
+    .then(() => {
+        console.log("Leaderboard authenticated");
+        startLeaderboard();
+    })
+    .catch((error) => {
+        console.error("Leaderboard auth error:", error);
+
+        const tbody = document.getElementById('leaderboard-body');
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="error-message">
+                    ❌ เชื่อมต่อระบบผู้ใช้ไม่ได้
+                    <br><br>
+                    ${escapeHTML(error.message)}
+                </td>
+            </tr>
+        `;
+    });
+ตรงนี้สำคัญ เพราะจะทำให้ Board รอ Anonymous Auth ก่อน แล้วค่อยอ่าน Firebase
+
+game-logic.js
+ในฟังก์ชัน updateUI() ให้หาโค้ด Rank เดิมที่ประมาณนี้:
+
+let rank = "Bronze";
+
+if (stars >= 4) rank = "Silver";
+if (stars >= 8) rank = "Gold";
+if (stars >= 12) rank = "Platinum";
+if (stars >= 16) rank = "Diamond";
+if (stars >= 20) rank = "Conqueror";
+
+document.getElementById('display-rank').innerText = rank;
+แล้วแทนด้วย:
+
+let rank = "Bronze";
+
+if (stars >= 50) {
+    rank = "Conqueror";
+} else if (stars >= 30) {
+    rank = "Diamond";
+} else if (stars >= 20) {
+    rank = "Platinum";
+} else if (stars >= 15) {
+    rank = "Gold";
+} else if (stars >= 10) {
+    rank = "Silver";
+}
+
+document.getElementById('display-rank').innerText = rank;
+แล้วหาโค้ดช่วงเริ่มกะใหม่ที่มี:
+
+gold -= 10;
+
+document.getElementById('cmd-terminal').innerHTML = '';
+ให้เปลี่ยนเป็น:
+
+gold -= 10;
+
+if (typeof window.syncDataToServer === 'function') {
+    window.syncDataToServer(shopName, stars, gold);
+}
+
+document.getElementById('cmd-terminal').innerHTML = '';
+เพื่อให้เงินที่ถูกหักตอนเริ่มกะใหม่อัปเดตขึ้น Leaderboard ด้วย
+
+เกณฑ์ Rank ที่ทั้งเกมและกระดานจะใช้ตรงกันคือ:
+
+Bronze       0–9
+Silver      10–14
+Gold        15–19
+Platinum    20–29
+Diamond     30–49
+Conqueror   50+
+หลังแก้ 2 ไฟล์นี้ให้ Commit แล้วรอ GitHub Pages อัปเดต จากนั้นกด Ctrl + F5 ทดสอบใหม่ได้เลยครับ.
+
+
+
+Pasted text.txt
+Document
+board.html
+
+ผมแก้ board.html จากไฟล์ที่คุณส่งมาให้แล้ว โดยคงเกณฑ์ Rank เดิมของคุณไว้:
+
+Silver 10
+
+Gold 15
+
+Platinum 20
+
+Diamond 30
+
+Conqueror 50
+
+และแก้จุดสำคัญให้ รอ Firebase Anonymous Auth ก่อนค่อยโหลด Leaderboard แทนการเรียก startLeaderboard() ทันที ซึ่งไฟล์เดิมของคุณเรียกตรง ๆ อยู่แถวช่วงเริ่ม Leaderboard 
+
+
+เอาไฟล์นี้ไป ทับ board.html ใน GitHub ได้เลย:
+
+ดาวน์โหลด board.html ที่แก้แล้ว
+
+หลังอัปขึ้น GitHub ให้กด Commit แล้วรอ GitHub Pages อัปเดต จากนั้นกด Ctrl + F5 ที่หน้ากระดานคะแนนครับ. 
+
+
+
+board.html
+HTML
+
+
+Library
+/
+board.html
+
+
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -892,7 +1122,26 @@
            เริ่ม Leaderboard
         ========================================== */
 
-        startLeaderboard();
+        ensureAnonymousAuth()
+            .then(() => {
+                console.log("Leaderboard authenticated");
+                startLeaderboard();
+            })
+            .catch((error) => {
+                console.error("Leaderboard auth error:", error);
+
+                const tbody = document.getElementById('leaderboard-body');
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="error-message">
+                            ❌ เชื่อมต่อระบบผู้ใช้ไม่ได้
+                            <br><br>
+                            ${escapeHTML(error.message)}
+                        </td>
+                    </tr>
+                `;
+            });
 
 
 
