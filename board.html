@@ -11,108 +11,534 @@
     >
 
     <title>
-        Live Leaderboard - PC Detective
+        PC Detective - Live Leaderboard
     </title>
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
     <style>
 
-        * {
-            box-sizing: border-box;
+        :root {
+
+            --bg:
+                #050b16;
+
+            --bg-soft:
+                #07101f;
+
+            --panel:
+                #101c30;
+
+            --panel-alt:
+                #16243a;
+
+            --line:
+                #2d405d;
+
+            --text:
+                #f8fafc;
+
+            --muted:
+                #9fb0c7;
+
+            --blue:
+                #3b82f6;
+
+            --blue-light:
+                #60a5fa;
+
+            --green:
+                #34d399;
+
+            --yellow:
+                #fbbf24;
+
+            --red:
+                #fb7185;
         }
+
+
+        * {
+            box-sizing:
+                border-box;
+        }
+
+
+        html,
+        body {
+
+            margin:
+                0;
+
+            width:
+                100%;
+
+            min-height:
+                100%;
+        }
+
 
         body {
 
-            margin: 0;
-
-            min-height: 100vh;
-
-            padding: 20px;
+            min-height:
+                100vh;
 
             background:
-                #0f172a;
+
+                radial-gradient(
+                    circle at top,
+                    #10213d 0%,
+                    #07101f 42%,
+                    #050b16 100%
+                );
 
             color:
-                #f8fafc;
+                var(--text);
 
             font-family:
                 'Noto Sans Thai',
                 sans-serif;
+
+            overflow-x:
+                hidden;
         }
 
 
-        .header {
+        button,
+        input {
+            font-family:
+                inherit;
+        }
 
-            text-align:
+
+        /* =========================================
+           PAGE
+        ========================================= */
+
+        .page {
+
+            width:
+                100%;
+
+            min-height:
+                100vh;
+
+            padding:
+
+                24px
+                clamp(
+                    18px,
+                    3vw,
+                    52px
+                )
+                38px;
+        }
+
+
+        /* =========================================
+           TOP CONTROL
+        ========================================= */
+
+        .top-controls {
+
+            position:
+                fixed;
+
+            top:
+                18px;
+
+            left:
+                22px;
+
+            right:
+                22px;
+
+            z-index:
+                100;
+
+            display:
+                flex;
+
+            align-items:
                 center;
 
-            margin-bottom:
-                30px;
+            justify-content:
+                space-between;
+
+            pointer-events:
+                none;
         }
 
 
-        h1 {
+        .top-controls button {
 
-            margin:
-                0 0 6px;
+            pointer-events:
+                auto;
+        }
+
+
+        .control-btn {
+
+            min-height:
+                44px;
+
+            padding:
+                9px 17px;
+
+            border:
+                1px solid #405675;
+
+            border-radius:
+                10px;
+
+            background:
+                rgba(
+                    15,
+                    28,
+                    48,
+                    .96
+                );
 
             color:
-                #3b82f6;
+                #edf5ff;
 
             font-size:
-                clamp(
-                    1.8rem,
-                    4vw,
-                    2.7rem
+                14px;
+
+            font-weight:
+                800;
+
+            cursor:
+                pointer;
+
+            box-shadow:
+                0 7px 22px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .3
                 );
+
+            transition:
+                .18s ease;
         }
 
 
-        .header p {
+        .control-btn:hover {
 
-            margin: 0;
+            transform:
+                translateY(
+                    -1px
+                );
 
-            color:
-                #cbd5e1;
+            background:
+                #1d3150;
+
+            border-color:
+                #60a5fa;
+        }
+
+
+        .fullscreen-btn {
+
+            margin-right:
+                auto;
         }
 
 
         .btn-clear {
 
-            position:
-                absolute;
-
-            top: 20px;
-
-            right: 20px;
-
-            border: none;
-
-            border-radius:
-                8px;
-
-            padding:
-                10px 18px;
+            margin-left:
+                auto;
 
             background:
+                #dc2626;
+
+            border-color:
                 #ef4444;
 
             color:
                 white;
-
-            font-weight:
-                bold;
-
-            cursor:
-                pointer;
         }
 
 
-        .table-container {
+        .btn-clear:hover {
+
+            background:
+                #ef4444;
+
+            border-color:
+                #f87171;
+        }
+
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        .board-header {
+
+            max-width:
+                1500px;
+
+            margin:
+                0 auto 20px;
+
+            padding-top:
+                8px;
+
+            text-align:
+                center;
+        }
+
+
+        .live-status {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            gap:
+                8px;
+
+            margin-bottom:
+                8px;
+
+            padding:
+                6px 13px;
+
+            border:
+                1px solid
+                rgba(
+                    52,
+                    211,
+                    153,
+                    .32
+                );
+
+            border-radius:
+                999px;
+
+            background:
+                rgba(
+                    16,
+                    185,
+                    129,
+                    .08
+                );
+
+            color:
+                #86efac;
+
+            font-size:
+                12px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1px;
+        }
+
+
+        .live-dot {
+
+            width:
+                9px;
+
+            height:
+                9px;
+
+            border-radius:
+                50%;
+
+            background:
+                #22c55e;
+
+            box-shadow:
+                0 0 13px
+                rgba(
+                    34,
+                    197,
+                    94,
+                    .9
+                );
+
+            animation:
+                livePulse
+                1.4s
+                infinite;
+        }
+
+
+        @keyframes livePulse {
+
+            0%,
+            100% {
+
+                opacity:
+                    1;
+
+            }
+
+            50% {
+
+                opacity:
+                    .35;
+
+            }
+        }
+
+
+        .board-title {
+
+            margin:
+                0;
+
+            color:
+                #ffffff;
+
+            font-size:
+                clamp(
+                    36px,
+                    4vw,
+                    60px
+                );
+
+            font-weight:
+                800;
+
+            line-height:
+                1.12;
+
+            letter-spacing:
+                -.8px;
+        }
+
+
+        .board-title span {
+
+            color:
+                var(
+                    --blue-light
+                );
+        }
+
+
+        .board-subtitle {
+
+            margin:
+                9px 0 0;
+
+            color:
+                #b6c7dc;
+
+            font-size:
+                clamp(
+                    14px,
+                    1.45vw,
+                    20px
+                );
+
+            font-weight:
+                500;
+        }
+
+
+        /* =========================================
+           INFO BAR
+        ========================================= */
+
+        .board-info {
+
+            max-width:
+                1500px;
+
+            margin:
+                0 auto 12px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                12px;
+
+            color:
+                #8fa2ba;
+
+            font-size:
+                12px;
+
+            font-weight:
+                600;
+        }
+
+
+        .board-info strong {
+
+            color:
+                #dce8f7;
+
+            font-weight:
+                800;
+        }
+
+
+        /* =========================================
+           BOARD
+        ========================================= */
+
+        .board-shell {
+
+            width:
+                100%;
+
+            max-width:
+                1500px;
+
+            margin:
+                0 auto;
+
+            border:
+                1px solid
+                #2d405d;
+
+            border-radius:
+                16px;
+
+            overflow:
+                hidden;
+
+            background:
+                #0f1b2d;
+
+            box-shadow:
+                0 24px 65px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .38
+                );
+        }
+
+
+        .table-scroll {
 
             width:
                 100%;
@@ -127,136 +553,628 @@
             width:
                 100%;
 
-            max-width:
-                1150px;
-
-            margin:
-                0 auto;
-
             border-collapse:
                 collapse;
 
-            overflow:
-                hidden;
-
-            border-radius:
-                12px;
-
-            background:
-                #1e293b;
-
-            box-shadow:
-                0 4px 10px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    .3
-                );
+            table-layout:
+                fixed;
         }
 
 
-        th,
-        td {
+        thead {
 
-            padding:
-                15px;
+            position:
+                sticky;
 
-            text-align:
-                center;
+            top:
+                0;
 
-            border-bottom:
-                1px solid
-                #334155;
-
-            font-size:
-                16px;
+            z-index:
+                20;
         }
 
 
         th {
 
+            height:
+                66px;
+
+            padding:
+                12px 14px;
+
             background:
-                #3b82f6;
+
+                linear-gradient(
+                    180deg,
+                    #2563eb,
+                    #1d4ed8
+                );
 
             color:
                 white;
 
+            border-bottom:
+                2px solid
+                #60a5fa;
+
+            text-align:
+                center;
+
+            white-space:
+                nowrap;
+
             font-size:
-                17px;
+                clamp(
+                    17px,
+                    1.45vw,
+                    22px
+                );
+
+            font-weight:
+                800;
         }
 
 
-        tr:nth-child(
+        td {
+
+            height:
+                68px;
+
+            padding:
+                11px 14px;
+
+            border-bottom:
+                1px solid
+                var(
+                    --line
+                );
+
+            color:
+                #f8fafc;
+
+            text-align:
+                center;
+
+            vertical-align:
+                middle;
+
+            font-size:
+                clamp(
+                    16px,
+                    1.35vw,
+                    21px
+                );
+
+            font-weight:
+                600;
+        }
+
+
+        tbody tr {
+
+            background:
+                var(
+                    --panel
+                );
+
+            transition:
+                background .15s ease;
+        }
+
+
+        tbody tr:nth-child(
             even
         ) {
 
             background:
-                #0f172a;
+                var(
+                    --panel-alt
+                );
+        }
+
+
+        tbody tr:hover {
+
+            background:
+                #1d3150;
+        }
+
+
+        tbody tr:last-child td {
+
+            border-bottom:
+                none;
+        }
+
+
+        /* =========================================
+           COLUMN WIDTH
+        ========================================= */
+
+        .col-position {
+
+            width:
+                10%;
+        }
+
+
+        .col-name {
+
+            width:
+                29%;
+        }
+
+
+        .col-rank {
+
+            width:
+                20%;
+        }
+
+
+        .col-stars {
+
+            width:
+                13%;
+        }
+
+
+        .col-accuracy {
+
+            width:
+                16%;
+        }
+
+
+        .col-money {
+
+            width:
+                12%;
+        }
+
+
+        /* =========================================
+           PLAYER
+        ========================================= */
+
+        .player-name {
+
+            display:
+                block;
+
+            max-width:
+                100%;
+
+            overflow:
+                hidden;
+
+            text-overflow:
+                ellipsis;
+
+            white-space:
+                nowrap;
+
+            color:
+                #ffffff;
+
+            font-size:
+                1.04em;
+
+            font-weight:
+                800;
+        }
+
+
+        .position-number {
+
+            font-size:
+                1.12em;
+
+            font-weight:
+                800;
+        }
+
+
+        /* =========================================
+           TOP 3
+        ========================================= */
+
+        .top-1 {
+
+            background:
+
+                linear-gradient(
+                    90deg,
+                    rgba(
+                        250,
+                        204,
+                        21,
+                        .20
+                    ),
+                    rgba(
+                        16,
+                        28,
+                        48,
+                        .98
+                    )
+                )
+
+                !important;
+        }
+
+
+        .top-1 td {
+
+            border-bottom-color:
+                rgba(
+                    250,
+                    204,
+                    21,
+                    .4
+                );
+        }
+
+
+        .top-1 .player-name {
+
+            color:
+                #fef08a;
+        }
+
+
+        .top-2 {
+
+            background:
+
+                linear-gradient(
+                    90deg,
+                    rgba(
+                        203,
+                        213,
+                        225,
+                        .15
+                    ),
+                    rgba(
+                        16,
+                        28,
+                        48,
+                        .98
+                    )
+                )
+
+                !important;
+        }
+
+
+        .top-3 {
+
+            background:
+
+                linear-gradient(
+                    90deg,
+                    rgba(
+                        217,
+                        119,
+                        6,
+                        .18
+                    ),
+                    rgba(
+                        16,
+                        28,
+                        48,
+                        .98
+                    )
+                )
+
+                !important;
+        }
+
+
+        .medal {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            gap:
+                6px;
+
+            font-size:
+                1.18em;
+
+            font-weight:
+                800;
+        }
+
+
+        /* =========================================
+           RANK
+        ========================================= */
+
+        .rank-box {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            gap:
+                8px;
+
+            min-width:
+                142px;
+
+            padding:
+                6px 13px;
+
+            border:
+                1px solid
+                #405675;
+
+            border-radius:
+                999px;
+
+            background:
+                rgba(
+                    7,
+                    16,
+                    31,
+                    .5
+                );
+
+            color:
+                #eef5ff;
+
+            font-size:
+                .92em;
+
+            font-weight:
+                800;
         }
 
 
         .rank-icon {
 
-            margin-right:
-                5px;
+            font-size:
+                1.22em;
+        }
+
+
+        /* =========================================
+           STAR
+        ========================================= */
+
+        .star-value {
+
+            color:
+                var(
+                    --yellow
+                );
 
             font-size:
-                21px;
+                1.08em;
+
+            font-weight:
+                800;
+
+            white-space:
+                nowrap;
+        }
+
+
+        /* =========================================
+           ACCURACY
+        ========================================= */
+
+        .accuracy {
+
+            display:
+                inline-flex;
+
+            min-width:
+                78px;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            padding:
+                6px 11px;
+
+            border-radius:
+                999px;
+
+            font-size:
+                .96em;
+
+            font-weight:
+                800;
         }
 
 
         .accuracy-good {
 
             color:
-                #10b981;
+                #86efac;
 
-            font-weight:
-                bold;
+            background:
+                rgba(
+                    34,
+                    197,
+                    94,
+                    .15
+                );
+
+            border:
+                1px solid
+                rgba(
+                    34,
+                    197,
+                    94,
+                    .42
+                );
         }
 
 
         .accuracy-medium {
 
             color:
-                #f59e0b;
+                #fde68a;
 
-            font-weight:
-                bold;
+            background:
+                rgba(
+                    245,
+                    158,
+                    11,
+                    .15
+                );
+
+            border:
+                1px solid
+                rgba(
+                    245,
+                    158,
+                    11,
+                    .42
+                );
         }
 
 
         .accuracy-bad {
 
             color:
-                #ef4444;
+                #fda4af;
 
-            font-weight:
-                bold;
+            background:
+                rgba(
+                    244,
+                    63,
+                    94,
+                    .15
+                );
+
+            border:
+                1px solid
+                rgba(
+                    244,
+                    63,
+                    94,
+                    .4
+                );
         }
 
 
-        .loading {
+        .accuracy-empty {
 
             color:
-                #94a3b8;
+                var(
+                    --muted
+                );
+
+            background:
+                rgba(
+                    148,
+                    163,
+                    184,
+                    .08
+                );
+
+            border:
+                1px solid
+                rgba(
+                    148,
+                    163,
+                    184,
+                    .2
+                );
+        }
+
+
+        .accuracy-detail {
+
+            margin-top:
+                4px;
+
+            color:
+                #8294ac;
+
+            font-size:
+                11px;
+
+            font-weight:
+                600;
+        }
+
+
+        /* =========================================
+           MONEY
+        ========================================= */
+
+        .money {
+
+            color:
+                var(
+                    --green
+                );
+
+            font-size:
+                1.04em;
+
+            font-weight:
+                800;
+
+            white-space:
+                nowrap;
+        }
+
+
+        /* =========================================
+           EMPTY / ERROR
+        ========================================= */
+
+        .status-cell {
+
+            height:
+                190px;
+
+            color:
+                #b3c2d5;
+
+            font-size:
+                20px;
+
+            font-weight:
+                600;
         }
 
 
         .error-message {
 
             color:
-                #ef4444;
-
-            padding:
-                25px;
+                #fda4af;
         }
 
+
+        /* =========================================
+           MODAL
+        ========================================= */
 
         .hidden {
 
             display:
-                none !important;
+                none
+                !important;
         }
 
 
@@ -265,7 +1183,8 @@
             position:
                 fixed;
 
-            inset: 0;
+            inset:
+                0;
 
             z-index:
                 1000;
@@ -287,12 +1206,12 @@
                     0,
                     0,
                     0,
-                    .85
+                    .84
                 );
 
             backdrop-filter:
                 blur(
-                    3px
+                    6px
                 );
         }
 
@@ -301,54 +1220,69 @@
 
             width:
                 min(
-                    360px,
+                    400px,
                     100%
                 );
 
             padding:
-                25px;
+                28px;
+
+            border:
+                1px solid
+                #405675;
 
             border-radius:
-                12px;
-
-            border-top:
-                4px solid
-                #ef4444;
+                16px;
 
             background:
-                #1e293b;
+                #111f34;
 
-            text-align:
-                center;
+            box-shadow:
+                0 25px 70px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .55
+                );
         }
 
 
         .modal-title {
 
             margin-bottom:
-                10px;
+                8px;
 
             color:
-                #ef4444;
+                #ffffff;
 
             font-size:
-                20px;
+                22px;
 
             font-weight:
-                bold;
+                800;
+
+            text-align:
+                center;
         }
 
 
         .modal-description {
 
             margin-bottom:
-                20px;
+                22px;
 
             color:
-                #cbd5e1;
+                #9fb0c7;
+
+            text-align:
+                center;
 
             font-size:
                 14px;
+
+            line-height:
+                1.7;
         }
 
 
@@ -356,9 +1290,6 @@
 
             margin-bottom:
                 15px;
-
-            text-align:
-                left;
         }
 
 
@@ -368,10 +1299,16 @@
                 block;
 
             margin-bottom:
-                5px;
+                6px;
 
             color:
-                #94a3b8;
+                #b6c6d9;
+
+            font-size:
+                13px;
+
+            font-weight:
+                700;
         }
 
 
@@ -380,24 +1317,46 @@
             width:
                 100%;
 
+            min-height:
+                46px;
+
             padding:
-                10px;
+                10px 12px;
 
             border:
                 1px solid
-                #334155;
+                #405675;
 
             border-radius:
-                6px;
+                9px;
+
+            outline:
+                none;
 
             background:
-                #0f172a;
+                #081426;
 
             color:
                 white;
 
-            outline:
-                none;
+            font-size:
+                15px;
+        }
+
+
+        .input-group input:focus {
+
+            border-color:
+                #60a5fa;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    59,
+                    130,
+                    246,
+                    .12
+                );
         }
 
 
@@ -408,24 +1367,31 @@
 
             gap:
                 10px;
+
+            margin-top:
+                22px;
         }
 
 
         .modal-buttons button {
 
-            flex: 1;
+            flex:
+                1;
 
-            padding:
-                10px;
+            min-height:
+                44px;
 
             border:
                 none;
 
             border-radius:
-                6px;
+                9px;
 
             color:
                 white;
+
+            font-weight:
+                800;
 
             cursor:
                 pointer;
@@ -435,47 +1401,168 @@
         .btn-cancel {
 
             background:
-                #64748b;
+                #475569;
         }
 
 
         .btn-confirm {
 
             background:
-                #ef4444;
+                #dc2626;
         }
 
 
+        /* =========================================
+           PROJECTOR / 1080P
+        ========================================= */
+
+        @media
+        (min-width: 1400px)
+        and
+        (min-height: 800px) {
+
+            th {
+
+                height:
+                    68px;
+
+                font-size:
+                    21px;
+            }
+
+
+            td {
+
+                height:
+                    72px;
+
+                font-size:
+                    20px;
+            }
+
+
+            .board-shell {
+
+                max-width:
+                    1550px;
+            }
+
+
+            .board-header {
+
+                max-width:
+                    1550px;
+            }
+
+
+            .board-info {
+
+                max-width:
+                    1550px;
+            }
+        }
+
+
+        /* =========================================
+           TABLET / MOBILE
+        ========================================= */
+
         @media (
-            max-width: 800px
+            max-width: 900px
         ) {
 
-            .btn-clear {
+            .page {
+
+                padding:
+                    14px;
+            }
+
+
+            .top-controls {
 
                 position:
                     static;
 
-                display:
-                    block;
+                width:
+                    100%;
 
-                margin:
-                    0 0 20px
-                    auto;
+                margin-bottom:
+                    14px;
+            }
+
+
+            .control-btn {
+
+                font-size:
+                    12px;
+
+                padding:
+                    8px 11px;
+            }
+
+
+            .board-header {
+
+                margin-bottom:
+                    14px;
+            }
+
+
+            .board-info {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+            }
+
+
+            table {
+
+                min-width:
+                    930px;
             }
 
 
             th,
             td {
 
-                white-space:
-                    nowrap;
-
                 font-size:
-                    14px;
-
-                padding:
-                    12px 9px;
+                    15px;
             }
+        }
+
+
+        /* =========================================
+           FULLSCREEN
+        ========================================= */
+
+        body.fullscreen-mode
+        .top-controls {
+
+            opacity:
+                .18;
+
+            transition:
+                opacity
+                .2s;
+        }
+
+
+        body.fullscreen-mode
+        .top-controls:hover {
+
+            opacity:
+                1;
+        }
+
+
+        body.fullscreen-mode
+        .page {
+
+            padding-top:
+                18px;
         }
 
     </style>
@@ -486,196 +1573,411 @@
 <body>
 
 
-<button
-    class="btn-clear"
-    onclick="openAdminModal()"
->
-    🗑️ ล้างคะแนนเริ่มคาบใหม่
-</button>
+<div class="page">
 
 
-<div
-    class="header"
->
+    <!-- =====================================
+         ปุ่มซ้าย / ขวา
+    ====================================== -->
 
-    <h1>
-        🏆 LIVE LEADERBOARD
-    </h1>
+    <div class="top-controls">
 
-    <p>
-        ตารางอันดับช่างซ่อมคอมพิวเตอร์ประจำคาบเรียน
-        (Real-time)
-    </p>
+
+        <!-- ซ้ายบน -->
+
+        <button
+            class="
+                control-btn
+                fullscreen-btn
+            "
+            onclick="toggleFullscreen()"
+            id="fullscreen-btn"
+        >
+
+            ⛶ เต็มจอ
+
+        </button>
+
+
+        <!-- ขวาบน -->
+
+        <button
+            class="
+                control-btn
+                btn-clear
+            "
+            onclick="openAdminModal()"
+        >
+
+            🗑️ เริ่มคาบใหม่
+
+        </button>
+
+
+    </div>
+
+
+    <!-- =====================================
+         HEADER
+    ====================================== -->
+
+    <header
+        class="board-header"
+    >
+
+
+        <div
+            class="live-status"
+        >
+
+            <span
+                class="live-dot"
+            ></span>
+
+            LIVE CLASSROOM
+
+        </div>
+
+
+        <h1
+            class="board-title"
+        >
+
+            🏆
+            <span>
+                PC DETECTIVE
+            </span>
+            LEADERBOARD
+
+        </h1>
+
+
+        <p
+            class="board-subtitle"
+        >
+
+            การแข่งขันวิเคราะห์และแก้ไขปัญหาคอมพิวเตอร์แบบ Real-time
+
+        </p>
+
+
+    </header>
+
+
+    <!-- =====================================
+         INFO
+    ====================================== -->
+
+    <div
+        class="board-info"
+    >
+
+        <div>
+
+            👨‍🔧 ผู้เล่นในห้อง:
+
+            <strong
+                id="player-count"
+            >
+                0
+            </strong>
+
+            คน
+
+        </div>
+
+
+        <div>
+
+            🔄 อัปเดตล่าสุด:
+
+            <strong
+                id="last-update"
+            >
+                รอข้อมูล...
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         LEADERBOARD
+    ====================================== -->
+
+    <section
+        class="board-shell"
+    >
+
+        <div
+            class="table-scroll"
+        >
+
+            <table>
+
+
+                <thead>
+
+
+                    <tr>
+
+
+                        <th
+                            class="
+                                col-position
+                            "
+                        >
+
+                            อันดับ
+
+                        </th>
+
+
+                        <th
+                            class="
+                                col-name
+                            "
+                        >
+
+                            ชื่อร้าน / นักเรียน
+
+                        </th>
+
+
+                        <th
+                            class="
+                                col-rank
+                            "
+                        >
+
+                            Rank
+
+                        </th>
+
+
+                        <th
+                            class="
+                                col-stars
+                            "
+                        >
+
+                            ดาว ⭐
+
+                        </th>
+
+
+                        <th
+                            class="
+                                col-accuracy
+                            "
+                        >
+
+                            Accuracy 🎯
+
+                        </th>
+
+
+                        <th
+                            class="
+                                col-money
+                            "
+                        >
+
+                            เงิน 💰
+
+                        </th>
+
+
+                    </tr>
+
+
+                </thead>
+
+
+                <tbody
+                    id="leaderboard-body"
+                >
+
+
+                    <tr>
+
+
+                        <td
+                            colspan="6"
+                            class="
+                                status-cell
+                            "
+                        >
+
+                            ⏳
+                            กำลังเชื่อมต่อระบบคะแนน...
+
+                        </td>
+
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </section>
+
 
 </div>
 
 
-<div
-    class="table-container"
->
-
-<table>
-
-<thead>
-
-<tr>
-
-    <th>
-        อันดับ
-    </th>
-
-    <th>
-        ชื่อร้านค้า / นักเรียน
-    </th>
-
-    <th>
-        Rank
-    </th>
-
-    <th>
-        ดาว ⭐
-    </th>
-
-    <th>
-        Accuracy 🎯
-    </th>
-
-    <th>
-        เงิน 💰
-    </th>
-
-</tr>
-
-</thead>
-
-
-<tbody
-    id="leaderboard-body"
->
-
-<tr>
-
-<td
-    colspan="6"
-    class="loading"
->
-
-    ⏳ กำลังเชื่อมต่อ Firebase...
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
+<!-- =====================================
+     ADMIN MODAL
+====================================== -->
 
 <div
     id="admin-modal"
-    class="modal-overlay hidden"
+    class="
+        modal-overlay
+        hidden
+    "
 >
 
-<div
-    class="modal-card"
->
 
-<div
-    class="modal-title"
->
+    <div
+        class="modal-card"
+    >
 
-    🔒 ยืนยันตัวตนผู้สอน
+
+        <div
+            class="modal-title"
+        >
+
+            🔒 ผู้ดูแลห้องเรียน
+
+        </div>
+
+
+        <div
+            class="modal-description"
+        >
+
+            เข้าสู่ระบบด้วยบัญชีผู้สอน
+            เพื่อรีเซ็ต Leaderboard
+            และเริ่มคาบเรียนใหม่
+
+        </div>
+
+
+        <div
+            class="input-group"
+        >
+
+
+            <label
+                for="admin-email"
+            >
+
+                📧 อีเมลผู้สอน
+
+            </label>
+
+
+            <input
+                type="email"
+                id="admin-email"
+                autocomplete="username"
+                placeholder="teacher@example.com"
+            >
+
+
+        </div>
+
+
+        <div
+            class="input-group"
+        >
+
+
+            <label
+                for="admin-password"
+            >
+
+                🔑 รหัสผ่าน
+
+            </label>
+
+
+            <input
+                type="password"
+                id="admin-password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+            >
+
+
+        </div>
+
+
+        <div
+            class="modal-buttons"
+        >
+
+
+            <button
+                class="
+                    btn-cancel
+                "
+                onclick="closeAdminModal()"
+            >
+
+                ยกเลิก
+
+            </button>
+
+
+            <button
+                class="
+                    btn-confirm
+                "
+                onclick="confirmClearBoard()"
+            >
+
+                ล้างคะแนน
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
 
 </div>
 
 
-<div
-    class="modal-description"
->
-
-    กรุณาเข้าสู่ระบบ
-    เพื่อล้างกระดานคะแนน
-
-</div>
-
-
-<div
-    class="input-group"
->
-
-<label>
-    📧 อีเมล
-</label>
-
-<input
-    type="email"
-    id="admin-email"
-    autocomplete="username"
->
-
-</div>
-
-
-<div
-    class="input-group"
->
-
-<label>
-    🔑 รหัสผ่าน
-</label>
-
-<input
-    type="password"
-    id="admin-password"
-    autocomplete="current-password"
->
-
-</div>
-
-
-<div
-    class="modal-buttons"
->
-
-<button
-    class="btn-cancel"
-    onclick="closeAdminModal()"
->
-
-    ยกเลิก
-
-</button>
-
-
-<button
-    class="btn-confirm"
-    onclick="confirmClearBoard()"
->
-
-    ล้างกระดาน
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
+<!-- =====================================
+     FIREBASE
+====================================== -->
 
 <script
     src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
 ></script>
 
+
 <script
     src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"
 ></script>
 
+
 <script
     src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"
 ></script>
+
 
 <script
     src="firebase-config.js"
@@ -685,6 +1987,10 @@
 <script>
 
 
+/* =========================================
+   ป้องกัน HTML Injection
+========================================= */
+
 function escapeHTML(
     value
 ) {
@@ -693,36 +1999,36 @@ function escapeHTML(
         value
     )
 
-    .replace(
-        /&/g,
-        "&amp;"
-    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
 
-    .replace(
-        /</g,
-        "&lt;"
-    )
+        .replace(
+            /</g,
+            "&lt;"
+        )
 
-    .replace(
-        />/g,
-        "&gt;"
-    )
+        .replace(
+            />/g,
+            "&gt;"
+        )
 
-    .replace(
-        /"/g,
-        "&quot;"
-    )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
 
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
 
-// ===============================
-// Rank
-// ===============================
+/* =========================================
+   RANK
+========================================= */
 
 function getRankDisplay(
     stars
@@ -734,83 +2040,100 @@ function getRankDisplay(
         ) || 0;
 
 
-    if (
-        stars >= 50
-    ) {
+    let icon =
+        "🥉";
 
-        return `
-            <span class="rank-icon">
-                👑
-            </span>
-            Conqueror
-        `;
-    }
+
+    let rank =
+        "Bronze";
 
 
     if (
-        stars >= 30
+        stars >=
+        50
     ) {
 
-        return `
-            <span class="rank-icon">
-                💎
-            </span>
-            Diamond
-        `;
-    }
+        icon =
+            "👑";
 
+        rank =
+            "Conqueror";
 
-    if (
-        stars >= 20
+    } else if (
+        stars >=
+        30
     ) {
 
-        return `
-            <span class="rank-icon">
-                🔮
-            </span>
-            Platinum
-        `;
-    }
+        icon =
+            "💎";
 
+        rank =
+            "Diamond";
 
-    if (
-        stars >= 15
+    } else if (
+        stars >=
+        20
     ) {
 
-        return `
-            <span class="rank-icon">
-                🥇
-            </span>
-            Gold
-        `;
-    }
+        icon =
+            "🔮";
 
+        rank =
+            "Platinum";
 
-    if (
-        stars >= 10
+    } else if (
+        stars >=
+        15
     ) {
 
-        return `
-            <span class="rank-icon">
-                🥈
-            </span>
-            Silver
-        `;
+        icon =
+            "🥇";
+
+        rank =
+            "Gold";
+
+    } else if (
+        stars >=
+        10
+    ) {
+
+        icon =
+            "🥈";
+
+        rank =
+            "Silver";
     }
 
 
     return `
-        <span class="rank-icon">
-            🥉
+
+        <span
+            class="
+                rank-box
+            "
+        >
+
+            <span
+                class="
+                    rank-icon
+                "
+            >
+
+                ${icon}
+
+            </span>
+
+            ${rank}
+
         </span>
-        Bronze
+
     `;
 }
 
 
-// ===============================
-// Accuracy
-// ===============================
+/* =========================================
+   ACCURACY
+========================================= */
 
 function getAccuracyHTML(
     accuracy,
@@ -835,13 +2158,18 @@ function getAccuracyHTML(
     ) {
 
         return `
+
             <span
-                style="
-                    color:#94a3b8;
+                class="
+                    accuracy
+                    accuracy-empty
                 "
             >
+
                 -
+
             </span>
+
         `;
     }
 
@@ -869,34 +2197,73 @@ function getAccuracyHTML(
 
 
     return `
+
         <span
-            class="${className}"
+            class="
+                accuracy
+                ${className}
+            "
         >
+
             ${accuracy}%
+
         </span>
+
     `;
 }
 
 
-// ===============================
-// Error
-// ===============================
+/* =========================================
+   TIME
+========================================= */
+
+function getTimeText() {
+
+    return new Date()
+        .toLocaleTimeString(
+            "th-TH",
+            {
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit",
+
+                hour12:
+                    false
+            }
+        );
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
 
 function showBoardError(
     message
 ) {
 
-    document
-        .getElementById(
-            "leaderboard-body"
-        )
-        .innerHTML = `
+    const tbody =
+        document
+            .getElementById(
+                "leaderboard-body"
+            );
+
+
+    tbody.innerHTML = `
 
         <tr>
 
             <td
                 colspan="6"
-                class="error-message"
+                class="
+                    status-cell
+                    error-message
+                "
             >
 
                 ❌
@@ -912,9 +2279,9 @@ function showBoardError(
 }
 
 
-// ===============================
-// Leaderboard
-// ===============================
+/* =========================================
+   LEADERBOARD
+========================================= */
 
 function startLeaderboard() {
 
@@ -936,9 +2303,31 @@ function startLeaderboard() {
 
             snapshot => {
 
+
+                /* =========================
+                   ไม่มีข้อมูล
+                ========================= */
+
                 if (
                     !snapshot.exists()
                 ) {
+
+
+                    document
+                        .getElementById(
+                            "player-count"
+                        )
+                        .innerText =
+                        "0";
+
+
+                    document
+                        .getElementById(
+                            "last-update"
+                        )
+                        .innerText =
+                        getTimeText();
+
 
                     tbody.innerHTML = `
 
@@ -946,10 +2335,15 @@ function startLeaderboard() {
 
                             <td
                                 colspan="6"
+                                class="
+                                    status-cell
+                                "
                             >
 
+                                👨‍🔧
+
                                 ยังไม่มีนักเรียน
-                                เริ่มเล่นในคาบนี้
+                                เริ่มทำงานในคาบนี้
 
                             </td>
 
@@ -957,66 +2351,113 @@ function startLeaderboard() {
 
                     `;
 
+
                     return;
                 }
 
+
+                /* =========================
+                   Firebase → Array
+                ========================= */
 
                 const players =
                     [];
 
 
                 snapshot.forEach(
+
                     child => {
 
+
                         const data =
-                            child.val() ||
-                            {};
+                            child.val()
+                            || {};
 
 
                         players.push({
 
+
                             shopName:
-                                data.shopName ||
+
+                                data.shopName
+                                ||
                                 "ไม่ระบุชื่อ",
 
+
                             stars:
+
                                 Number(
                                     data.stars
                                 ) || 0,
 
+
                             gold:
+
                                 Number(
                                     data.gold
                                 ) || 0,
 
+
                             accuracy:
+
                                 Number(
                                     data.accuracy
                                 ) || 0,
 
+
                             totalAttempts:
+
                                 Number(
                                     data.totalAttempts
                                 ) || 0,
 
+
                             correctAttempts:
+
                                 Number(
                                     data.correctAttempts
                                 ) || 0
+
                         });
                     }
                 );
 
 
-                // ดาวมากก่อน
-                // ถ้าดาวเท่ากัน Accuracy มากก่อน
-                // ถ้ายังเท่ากัน เงินมากก่อน
+                /* =========================
+                   จำนวนผู้เล่น
+                ========================= */
+
+                document
+                    .getElementById(
+                        "player-count"
+                    )
+                    .innerText =
+                    players.length;
+
+
+                document
+                    .getElementById(
+                        "last-update"
+                    )
+                    .innerText =
+                    getTimeText();
+
+
+                /* =========================
+                   เรียงอันดับ
+
+                   1. ดาว
+                   2. Accuracy
+                   3. เงิน
+                ========================= */
 
                 players.sort(
+
                     (
                         a,
                         b
                     ) => {
+
 
                         if (
                             b.stars !==
@@ -1024,7 +2465,8 @@ function startLeaderboard() {
                         ) {
 
                             return (
-                                b.stars -
+                                b.stars
+                                -
                                 a.stars
                             );
                         }
@@ -1036,14 +2478,16 @@ function startLeaderboard() {
                         ) {
 
                             return (
-                                b.accuracy -
+                                b.accuracy
+                                -
                                 a.accuracy
                             );
                         }
 
 
                         return (
-                            b.gold -
+                            b.gold
+                            -
                             a.gold
                         );
                     }
@@ -1054,40 +2498,16 @@ function startLeaderboard() {
                     "";
 
 
+                /* =========================
+                   สร้างตาราง
+                ========================= */
+
                 players.forEach(
+
                     (
                         player,
                         index
                     ) => {
-
-                        let position =
-                            index + 1;
-
-
-                        if (
-                            index ===
-                            0
-                        ) {
-
-                            position =
-                                "🥇 1";
-
-                        } else if (
-                            index ===
-                            1
-                        ) {
-
-                            position =
-                                "🥈 2";
-
-                        } else if (
-                            index ===
-                            2
-                        ) {
-
-                            position =
-                                "🥉 3";
-                        }
 
 
                         const row =
@@ -1097,73 +2517,220 @@ function startLeaderboard() {
                                 );
 
 
+                        /* =========================
+                           TOP 3
+                        ========================= */
+
+                        if (
+                            index ===
+                            0
+                        ) {
+
+                            row.classList
+                                .add(
+                                    "top-1"
+                                );
+
+                        } else if (
+                            index ===
+                            1
+                        ) {
+
+                            row.classList
+                                .add(
+                                    "top-2"
+                                );
+
+                        } else if (
+                            index ===
+                            2
+                        ) {
+
+                            row.classList
+                                .add(
+                                    "top-3"
+                                );
+                        }
+
+
+                        /* =========================
+                           POSITION
+                        ========================= */
+
+                        let positionHTML = `
+
+                            <span
+                                class="
+                                    position-number
+                                "
+                            >
+
+                                ${index + 1}
+
+                            </span>
+
+                        `;
+
+
+                        if (
+                            index ===
+                            0
+                        ) {
+
+                            positionHTML = `
+
+                                <span
+                                    class="
+                                        medal
+                                    "
+                                >
+
+                                    🥇 1
+
+                                </span>
+
+                            `;
+
+                        } else if (
+                            index ===
+                            1
+                        ) {
+
+                            positionHTML = `
+
+                                <span
+                                    class="
+                                        medal
+                                    "
+                                >
+
+                                    🥈 2
+
+                                </span>
+
+                            `;
+
+                        } else if (
+                            index ===
+                            2
+                        ) {
+
+                            positionHTML = `
+
+                                <span
+                                    class="
+                                        medal
+                                    "
+                                >
+
+                                    🥉 3
+
+                                </span>
+
+                            `;
+                        }
+
+
+                        /* =========================
+                           ROW
+                        ========================= */
+
                         row.innerHTML = `
 
-                            <td>
-                                <b>
-                                    ${position}
-                                </b>
-                            </td>
 
                             <td>
-                                <b>
+
+                                ${positionHTML}
+
+                            </td>
+
+
+                            <td>
+
+                                <span
+                                    class="
+                                        player-name
+                                    "
+                                >
+
                                     ${escapeHTML(
                                         player.shopName
                                     )}
-                                </b>
+
+                                </span>
+
                             </td>
 
+
                             <td>
+
                                 ${getRankDisplay(
                                     player.stars
                                 )}
+
                             </td>
 
-                            <td
-                                style="
-                                    color:#f59e0b;
-                                "
-                            >
-                                <b>
+
+                            <td>
+
+                                <span
+                                    class="
+                                        star-value
+                                    "
+                                >
+
                                     ${player.stars}
                                     ⭐
-                                </b>
+
+                                </span>
+
                             </td>
+
 
                             <td>
 
                                 ${getAccuracyHTML(
+
                                     player.accuracy,
+
                                     player.totalAttempts
+
                                 )}
 
+
                                 <div
-                                    style="
-                                        margin-top:3px;
-                                        color:#64748b;
-                                        font-size:10px;
+                                    class="
+                                        accuracy-detail
                                     "
                                 >
 
+                                    ถูก
+
                                     ${player.correctAttempts}
+
                                     /
+
                                     ${player.totalAttempts}
 
                                 </div>
 
                             </td>
 
-                            <td
-                                style="
-                                    color:#10b981;
-                                "
-                            >
 
-                                <b>
+                            <td>
+
+                                <span
+                                    class="
+                                        money
+                                    "
+                                >
+
                                     $${player.gold}
-                                </b>
+
+                                </span>
 
                             </td>
+
 
                         `;
 
@@ -1176,53 +2743,184 @@ function startLeaderboard() {
             },
 
 
+            /* =========================
+               Firebase Error
+            ========================= */
+
             error => {
 
+
                 console.error(
+                    "Leaderboard Error:",
                     error
                 );
 
 
                 showBoardError(
-                    "โหลดข้อมูลไม่ได้: " +
+
+                    "โหลดข้อมูลไม่ได้: "
+                    +
                     error.message
+
                 );
             }
         );
 }
 
 
-// ===============================
-// Boot
-// ===============================
+/* =========================================
+   BOOT
+========================================= */
 
 async function bootLeaderboard() {
 
     try {
 
+
+        if (
+            typeof
+            ensureAnonymousAuth
+            !==
+            "function"
+        ) {
+
+            throw new Error(
+                "ไม่พบ ensureAnonymousAuth() ใน firebase-config.js"
+            );
+        }
+
+
         await
             ensureAnonymousAuth();
 
 
+        console.log(
+            "Leaderboard authenticated"
+        );
+
+
         startLeaderboard();
+
 
     } catch (
         error
     ) {
 
+
+        console.error(
+            "Authentication Error:",
+            error
+        );
+
+
         showBoardError(
-            "Authentication Error: " +
+
+            "เชื่อมต่อ Firebase ไม่สำเร็จ: "
+            +
             error.message
+
         );
     }
 }
 
 
-// ===============================
-// Admin
-// ===============================
+/* =========================================
+   FULLSCREEN
+========================================= */
+
+async function toggleFullscreen() {
+
+    try {
+
+
+        if (
+            !document.fullscreenElement
+        ) {
+
+
+            await
+                document
+                    .documentElement
+                    .requestFullscreen();
+
+
+            document
+                .body
+                .classList
+                .add(
+                    "fullscreen-mode"
+                );
+
+
+            document
+                .getElementById(
+                    "fullscreen-btn"
+                )
+                .innerText =
+                "✕ ออกจากเต็มจอ";
+
+
+        } else {
+
+
+            await
+                document
+                    .exitFullscreen();
+
+        }
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+            "Fullscreen Error:",
+            error
+        );
+    }
+}
+
+
+document.addEventListener(
+
+    "fullscreenchange",
+
+    () => {
+
+
+        if (
+            !document.fullscreenElement
+        ) {
+
+
+            document
+                .body
+                .classList
+                .remove(
+                    "fullscreen-mode"
+                );
+
+
+            document
+                .getElementById(
+                    "fullscreen-btn"
+                )
+                .innerText =
+                "⛶ เต็มจอ";
+
+        }
+    }
+);
+
+
+/* =========================================
+   ADMIN MODAL
+========================================= */
 
 function openAdminModal() {
+
 
     document
         .getElementById(
@@ -1232,10 +2930,43 @@ function openAdminModal() {
         .remove(
             "hidden"
         );
+
+
+    document
+        .getElementById(
+            "admin-email"
+        )
+        .value =
+        "";
+
+
+    document
+        .getElementById(
+            "admin-password"
+        )
+        .value =
+        "";
+
+
+    setTimeout(
+
+        () => {
+
+            document
+                .getElementById(
+                    "admin-email"
+                )
+                .focus();
+
+        },
+
+        100
+    );
 }
 
 
 function closeAdminModal() {
+
 
     document
         .getElementById(
@@ -1248,7 +2979,12 @@ function closeAdminModal() {
 }
 
 
+/* =========================================
+   CLEAR LEADERBOARD
+========================================= */
+
 async function confirmClearBoard() {
+
 
     const email =
         document
@@ -1268,13 +3004,16 @@ async function confirmClearBoard() {
 
 
     if (
-        !email ||
+        !email
+        ||
         !password
     ) {
 
+
         alert(
-            "กรุณากรอกอีเมลและรหัสผ่าน"
+            "⚠️ กรุณากรอกอีเมลและรหัสผ่านให้ครบ"
         );
+
 
         return;
     }
@@ -1285,12 +3024,24 @@ async function confirmClearBoard() {
 
     try {
 
+
+        /* =========================
+           LOGIN ADMIN
+        ========================= */
+
         await auth
             .signInWithEmailAndPassword(
+
                 email,
+
                 password
+
             );
 
+
+        /* =========================
+           DELETE BOARD
+        ========================= */
 
         await db
             .ref(
@@ -1300,29 +3051,43 @@ async function confirmClearBoard() {
 
 
         alert(
-            "✅ ล้างกระดานเรียบร้อย"
+            "✅ ล้างคะแนนเรียบร้อย พร้อมเริ่มคาบใหม่"
         );
 
+
+        /* =========================
+           LOGOUT ADMIN
+        ========================= */
 
         await
             auth.signOut();
 
 
+        /* =========================
+           RETURN ANONYMOUS
+        ========================= */
+
         await
             ensureAnonymousAuth();
+
 
     } catch (
         error
     ) {
 
+
         console.error(
+            "Clear Leaderboard Error:",
             error
         );
 
 
         alert(
-            "❌ ล้างกระดานไม่สำเร็จ\n\n" +
+
+            "❌ ล้างกระดานไม่สำเร็จ\n\n"
+            +
             error.message
+
         );
 
 
@@ -1332,8 +3097,13 @@ async function confirmClearBoard() {
                 auth.signOut();
 
         } catch (
-            e
-        ) {}
+            signOutError
+        ) {
+
+            console.error(
+                signOutError
+            );
+        }
 
 
         try {
@@ -1342,11 +3112,20 @@ async function confirmClearBoard() {
                 ensureAnonymousAuth();
 
         } catch (
-            e
-        ) {}
+            authError
+        ) {
+
+            console.error(
+                authError
+            );
+        }
     }
 }
 
+
+/* =========================================
+   ENTER PASSWORD
+========================================= */
 
 document
     .getElementById(
@@ -1358,16 +3137,23 @@ document
 
         event => {
 
+
             if (
                 event.key ===
                 "Enter"
             ) {
 
+
                 confirmClearBoard();
+
             }
         }
     );
 
+
+/* =========================================
+   START
+========================================= */
 
 bootLeaderboard();
 
