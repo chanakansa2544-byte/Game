@@ -1,233 +1,3 @@
-
-Friday 2:08 PM
-
-pc-game-new_verion.zip
-Zip Archive
-ผมอยากได้หน้า UX UI ของเกมเว็ปนี้ให้มันดีกว่านี้ ให้ไม่เหมือนกับใช้AI ทำงาน
-
-มันมีบ้างส่วนที่มันไม่สมส่วน แก้ได้ไหม
-
-Generated image: Dark PC Detective Service Bay Dashboard
-
-
-Edit
-
-
-f912c40c-1880-4355-9bad-2a78baea0177.png
-ข้อมูลผมไม่ขึ้นกระดานคะแนน
-
-beb02cd1-3723-4fd5-9c4b-02abe319d679.png
-ผมใช้อันนี้นะ
-
-ได้ครับ งั้นใช้เกณฑ์นี้เป็นมาตรฐานเดียวกัน:
-
-Bronze       0–9
-Silver      10–14
-Gold        15–19
-Platinum    20–29
-Diamond     30–49
-Conqueror   50+
-ดังนั้น board.html ที่คุณมีอยู่ตอนนี้ถูกแล้ว ไม่ต้องแก้ getRankDisplay() เพราะใช้เกณฑ์นี้อยู่แล้ว
-
-แต่ต้องแก้ game-logic.js ให้ตรงกับ Board ด้วย
-
-หาใน game-logic.js ตรงฟังก์ชัน updateUI() ที่มี:
-
-let rank = "Bronze";
-if (stars >= 4) rank = "Silver";
-if (stars >= 8) rank = "Gold";
-if (stars >= 12) rank = "Platinum";
-if (stars >= 16) rank = "Diamond";
-if (stars >= 20) rank = "Conqueror";
-
-document.getElementById('display-rank').innerText = rank;
-ให้ ลบส่วนนี้แล้ววางอันนี้แทน:
-
-let rank = "Bronze";
-
-if (stars >= 50) {
-    rank = "Conqueror";
-} else if (stars >= 30) {
-    rank = "Diamond";
-} else if (stars >= 20) {
-    rank = "Platinum";
-} else if (stars >= 15) {
-    rank = "Gold";
-} else if (stars >= 10) {
-    rank = "Silver";
-}
-
-document.getElementById('display-rank').innerText = rank;
-หลังแก้แล้วทั้ง ในเกมและ Leaderboard จะตรงกัน:
-
-ดาว	Rank
-0–9 ⭐	🥉 Bronze
-10–14 ⭐	🥈 Silver
-15–19 ⭐	🥇 Gold
-20–29 ⭐	🔮 Platinum
-30–49 ⭐	💎 Diamond
-50+ ⭐	👑 Conqueror
-ส่วน board.html ของคุณที่ผมตรวจล่าสุดมีเกณฑ์ 10/15/20/30/50 อยู่แล้ว จึงไม่ต้องเปลี่ยนส่วน Rank ครับ
-
-ยังต้องแก้ board.html เรื่องรอ Firebase Auth ตามที่บอกก่อนหน้า เพราะอันนั้นเกี่ยวกับปัญหาคะแนนไม่ขึ้นโดยตรงครับ.
-
-
-ส่วนที่ต้องแก้ เขียนเป็นโค้ดพร้อมใช้งานให้ผม
-
-ได้ครับ ผมสรุปให้เป็น โค้ดพร้อมใช้เฉพาะส่วนที่ต้องแก้ ตามเกณฑ์ Rank ที่คุณยืนยัน และแก้เรื่อง Leaderboard ให้รอ Firebase Auth ก่อนอ่านข้อมูลด้วย
-
-มี 2 ไฟล์ที่ต้องแก้คือ board.html กับ game-logic.js
-
-board.html
-ในไฟล์ board.html ให้หา function getRankDisplay(stars) แล้วใช้เวอร์ชันนี้ได้เลย:
-
-function getRankDisplay(stars) {
-    stars = Number(stars) || 0;
-
-    if (stars >= 50) {
-        return `<span class="rank-icon">👑</span> Conqueror`;
-    }
-
-    if (stars >= 30) {
-        return `<span class="rank-icon">💎</span> Diamond`;
-    }
-
-    if (stars >= 20) {
-        return `<span class="rank-icon">🔮</span> Platinum`;
-    }
-
-    if (stars >= 15) {
-        return `<span class="rank-icon">🥇</span> Gold`;
-    }
-
-    if (stars >= 10) {
-        return `<span class="rank-icon">🥈</span> Silver`;
-    }
-
-    return `<span class="rank-icon">🥉</span> Bronze`;
-}
-จากนั้นหา:
-
-startLeaderboard();
-แล้ว ลบบรรทัดนั้นออก เปลี่ยนเป็น:
-
-ensureAnonymousAuth()
-    .then(() => {
-        console.log("Leaderboard authenticated");
-        startLeaderboard();
-    })
-    .catch((error) => {
-        console.error("Leaderboard auth error:", error);
-
-        const tbody = document.getElementById('leaderboard-body');
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="error-message">
-                    ❌ เชื่อมต่อระบบผู้ใช้ไม่ได้
-                    <br><br>
-                    ${escapeHTML(error.message)}
-                </td>
-            </tr>
-        `;
-    });
-ตรงนี้สำคัญ เพราะจะทำให้ Board รอ Anonymous Auth ก่อน แล้วค่อยอ่าน Firebase
-
-game-logic.js
-ในฟังก์ชัน updateUI() ให้หาโค้ด Rank เดิมที่ประมาณนี้:
-
-let rank = "Bronze";
-
-if (stars >= 4) rank = "Silver";
-if (stars >= 8) rank = "Gold";
-if (stars >= 12) rank = "Platinum";
-if (stars >= 16) rank = "Diamond";
-if (stars >= 20) rank = "Conqueror";
-
-document.getElementById('display-rank').innerText = rank;
-แล้วแทนด้วย:
-
-let rank = "Bronze";
-
-if (stars >= 50) {
-    rank = "Conqueror";
-} else if (stars >= 30) {
-    rank = "Diamond";
-} else if (stars >= 20) {
-    rank = "Platinum";
-} else if (stars >= 15) {
-    rank = "Gold";
-} else if (stars >= 10) {
-    rank = "Silver";
-}
-
-document.getElementById('display-rank').innerText = rank;
-แล้วหาโค้ดช่วงเริ่มกะใหม่ที่มี:
-
-gold -= 10;
-
-document.getElementById('cmd-terminal').innerHTML = '';
-ให้เปลี่ยนเป็น:
-
-gold -= 10;
-
-if (typeof window.syncDataToServer === 'function') {
-    window.syncDataToServer(shopName, stars, gold);
-}
-
-document.getElementById('cmd-terminal').innerHTML = '';
-เพื่อให้เงินที่ถูกหักตอนเริ่มกะใหม่อัปเดตขึ้น Leaderboard ด้วย
-
-เกณฑ์ Rank ที่ทั้งเกมและกระดานจะใช้ตรงกันคือ:
-
-Bronze       0–9
-Silver      10–14
-Gold        15–19
-Platinum    20–29
-Diamond     30–49
-Conqueror   50+
-หลังแก้ 2 ไฟล์นี้ให้ Commit แล้วรอ GitHub Pages อัปเดต จากนั้นกด Ctrl + F5 ทดสอบใหม่ได้เลยครับ.
-
-
-
-Pasted text.txt
-Document
-board.html
-
-ผมแก้ board.html จากไฟล์ที่คุณส่งมาให้แล้ว โดยคงเกณฑ์ Rank เดิมของคุณไว้:
-
-Silver 10
-
-Gold 15
-
-Platinum 20
-
-Diamond 30
-
-Conqueror 50
-
-และแก้จุดสำคัญให้ รอ Firebase Anonymous Auth ก่อนค่อยโหลด Leaderboard แทนการเรียก startLeaderboard() ทันที ซึ่งไฟล์เดิมของคุณเรียกตรง ๆ อยู่แถวช่วงเริ่ม Leaderboard 
-
-
-เอาไฟล์นี้ไป ทับ board.html ใน GitHub ได้เลย:
-
-ดาวน์โหลด board.html ที่แก้แล้ว
-
-หลังอัปขึ้น GitHub ให้กด Commit แล้วรอ GitHub Pages อัปเดต จากนั้นกด Ctrl + F5 ที่หน้ากระดานคะแนนครับ. 
-
-
-
-board.html
-HTML
-
-
-Library
-/
-board.html
-
-
-
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -247,12 +17,14 @@ board.html
         }
 
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: 'Noto Sans Thai', sans-serif;
             margin: 0;
-            padding: 20px;
             min-height: 100vh;
+            padding: 20px;
+
+            background: #0f172a;
+            color: #f8fafc;
+
+            font-family: 'Noto Sans Thai', sans-serif;
         }
 
         .header {
@@ -261,31 +33,45 @@ board.html
         }
 
         h1 {
+            margin: 0 0 6px;
+
             color: #3b82f6;
-            font-size: 2.5em;
-            margin-bottom: 5px;
+
+            font-size: clamp(
+                1.8rem,
+                4vw,
+                2.7rem
+            );
         }
 
         .header p {
+            margin: 0;
             color: #cbd5e1;
         }
 
         .btn-clear {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
             position: absolute;
+
             top: 20px;
             right: 20px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding: 10px 18px;
+
+            background: #ef4444;
+            color: white;
+
+            font-weight: bold;
+            font-size: 15px;
+
+            cursor: pointer;
         }
 
         .btn-clear:hover {
-            background-color: #dc2626;
+            background: #dc2626;
         }
 
         .table-container {
@@ -296,34 +82,47 @@ board.html
         table {
             width: 100%;
             max-width: 1000px;
+
             margin: 0 auto;
+
             border-collapse: collapse;
-            background-color: #1e293b;
-            border-radius: 12px;
+
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+
+            border-radius: 12px;
+
+            background: #1e293b;
+
+            box-shadow:
+                0 4px 10px
+                rgba(0, 0, 0, 0.3);
         }
 
         th,
         td {
             padding: 15px;
+
             text-align: center;
-            border-bottom: 1px solid #334155;
-            font-size: 18px;
+
+            border-bottom:
+                1px solid #334155;
+
+            font-size: 17px;
         }
 
         th {
-            background-color: #3b82f6;
+            background: #3b82f6;
             color: white;
-            font-size: 20px;
+
+            font-size: 18px;
         }
 
         tr:nth-child(even) {
-            background-color: #0f172a;
+            background: #0f172a;
         }
 
         .rank-icon {
-            font-size: 24px;
+            font-size: 22px;
             margin-right: 5px;
         }
 
@@ -332,8 +131,8 @@ board.html
         }
 
         .error-message {
-            color: #ef4444;
             padding: 25px;
+            color: #ef4444;
         }
 
         .hidden {
@@ -341,50 +140,57 @@ board.html
         }
 
         /* =========================
-           Admin Modal
+           ADMIN MODAL
         ========================= */
 
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            inset: 0;
 
             z-index: 1000;
 
-            backdrop-filter: blur(3px);
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
 
             padding: 20px;
+
+            background:
+                rgba(0, 0, 0, 0.85);
+
+            backdrop-filter:
+                blur(3px);
         }
 
         .modal-card {
-            background: #1e293b;
+            width: min(
+                360px,
+                100%
+            );
 
             padding: 25px;
 
             border-radius: 12px;
 
+            border-top:
+                4px solid #ef4444;
+
+            background:
+                #1e293b;
+
             text-align: center;
 
-            max-width: 350px;
-            width: 100%;
-
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-
-            border-top: 4px solid #ef4444;
+            box-shadow:
+                0 10px 25px
+                rgba(0, 0, 0, 0.5);
         }
 
         .modal-title {
-            color: #ef4444;
-
             margin-bottom: 10px;
+
+            color: #ef4444;
 
             font-size: 20px;
             font-weight: bold;
@@ -392,7 +198,9 @@ board.html
 
         .modal-description {
             margin-bottom: 20px;
+
             color: #cbd5e1;
+
             font-size: 14px;
         }
 
@@ -403,9 +211,11 @@ board.html
 
         .input-group label {
             display: block;
+
             margin-bottom: 5px;
 
             color: #94a3b8;
+
             font-size: 14px;
         }
 
@@ -414,67 +224,70 @@ board.html
 
             padding: 10px;
 
+            border:
+                1px solid #334155;
+
             border-radius: 6px;
-            border: 1px solid #334155;
-
-            background: #0f172a;
-            color: #f8fafc;
-
-            font-size: 16px;
 
             outline: none;
+
+            background:
+                #0f172a;
+
+            color:
+                #f8fafc;
+
+            font-size: 16px;
         }
 
         .input-group input:focus {
-            border-color: #3b82f6;
+            border-color:
+                #3b82f6;
         }
 
         .modal-buttons {
             display: flex;
+
             gap: 10px;
+
             margin-top: 20px;
         }
 
-        .btn-cancel {
-            background-color: #64748b;
-            color: white;
+        .modal-buttons button {
+            flex: 1;
 
             border: none;
 
-            padding: 10px;
-
             border-radius: 6px;
 
-            cursor: pointer;
+            padding: 10px;
 
-            flex: 1;
+            color: white;
 
             font-size: 16px;
+
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background:
+                #64748b;
         }
 
         .btn-confirm {
-            background-color: #ef4444;
-            color: white;
+            background:
+                #ef4444;
 
-            border: none;
-
-            padding: 10px;
-
-            border-radius: 6px;
-
-            cursor: pointer;
-
-            flex: 1;
-
-            font-size: 16px;
             font-weight: bold;
         }
 
         /* =========================
-           Responsive
+           RESPONSIVE
         ========================= */
 
-        @media (max-width: 800px) {
+        @media (
+            max-width: 800px
+        ) {
 
             body {
                 padding: 15px;
@@ -482,49 +295,49 @@ board.html
 
             .btn-clear {
                 position: static;
-                display: block;
-                margin-left: auto;
-                margin-bottom: 20px;
-            }
 
-            h1 {
-                font-size: 2em;
+                display: block;
+
+                margin:
+                    0 0 20px auto;
             }
 
             th,
             td {
-                padding: 12px 10px;
-                font-size: 15px;
-                white-space: nowrap;
-            }
+                padding:
+                    12px 10px;
 
-            th {
-                font-size: 16px;
+                font-size:
+                    15px;
+
+                white-space:
+                    nowrap;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (
+            max-width: 480px
+        ) {
 
             body {
                 padding: 10px;
-            }
-
-            h1 {
-                font-size: 1.6em;
-            }
-
-            .header p {
-                font-size: 13px;
             }
 
             .btn-clear {
                 width: 100%;
             }
 
+            .header p {
+                font-size: 13px;
+            }
+
             th,
             td {
-                padding: 10px 8px;
-                font-size: 13px;
+                padding:
+                    10px 8px;
+
+                font-size:
+                    13px;
             }
         }
     </style>
@@ -550,7 +363,9 @@ board.html
 
     <div class="header">
 
-        <h1>🏆 LIVE LEADERBOARD</h1>
+        <h1>
+            🏆 LIVE LEADERBOARD
+        </h1>
 
         <p>
             ตารางอันดับช่างซ่อมคอมพิวเตอร์ประจำคาบเรียน
@@ -572,7 +387,9 @@ board.html
 
                 <tr>
 
-                    <th>อันดับ</th>
+                    <th>
+                        อันดับ
+                    </th>
 
                     <th>
                         ชื่อร้านค้า / นักเรียน
@@ -595,7 +412,9 @@ board.html
             </thead>
 
 
-            <tbody id="leaderboard-body">
+            <tbody
+                id="leaderboard-body"
+            >
 
                 <tr>
 
@@ -624,23 +443,32 @@ board.html
         class="modal-overlay hidden"
     >
 
-        <div class="modal-card">
+        <div
+            class="modal-card"
+        >
 
-            <div class="modal-title">
+            <div
+                class="modal-title"
+            >
                 🔒 ยืนยันตัวตนผู้สอน
             </div>
 
 
-            <div class="modal-description">
-
-                กรุณาเข้าสู่ระบบเพื่อล้างกระดานคะแนน
-
+            <div
+                class="modal-description"
+            >
+                กรุณาเข้าสู่ระบบ
+                เพื่อล้างกระดานคะแนน
             </div>
 
 
-            <div class="input-group">
+            <div
+                class="input-group"
+            >
 
-                <label>
+                <label
+                    for="admin-email"
+                >
                     📧 อีเมล:
                 </label>
 
@@ -654,9 +482,13 @@ board.html
             </div>
 
 
-            <div class="input-group">
+            <div
+                class="input-group"
+            >
 
-                <label>
+                <label
+                    for="admin-password"
+                >
                     🔑 รหัสผ่าน:
                 </label>
 
@@ -670,7 +502,9 @@ board.html
             </div>
 
 
-            <div class="modal-buttons">
+            <div
+                class="modal-buttons"
+            >
 
                 <button
                     class="btn-cancel"
@@ -678,7 +512,6 @@ board.html
                 >
                     ยกเลิก
                 </button>
-
 
                 <button
                     class="btn-confirm"
@@ -694,514 +527,642 @@ board.html
     </div>
 
 
-
     <!-- =========================
          Firebase SDK
     ========================== -->
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script
+        src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
+    ></script>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script
+        src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"
+    ></script>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script
+        src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"
+    ></script>
 
-
-    <!--
-        firebase-config.js ต้องมี:
-        const db = firebase.database();
-        const auth = firebase.auth();
-    -->
-
-    <script src="firebase-config.js"></script>
-
+    <script
+        src="firebase-config.js"
+    ></script>
 
 
     <script>
 
         /* ==========================================
            Rank
+           
+           Bronze      0 - 9
+           Silver     10 - 14
+           Gold       15 - 19
+           Platinum   20 - 29
+           Diamond    30 - 49
+           Conqueror  50+
         ========================================== */
 
-        function getRankDisplay(stars) {
+        function getRankDisplay(
+            stars
+        ) {
 
-            stars = Number(stars) || 0;
+            stars =
+                Number(
+                    stars
+                ) || 0;
 
-            if (stars >= 50) {
+
+            if (
+                stars >= 50
+            ) {
 
                 return `
-                    <span class="rank-icon">👑</span>
+                    <span
+                        class="rank-icon"
+                    >
+                        👑
+                    </span>
                     Conqueror
                 `;
-
             }
 
-            if (stars >= 30) {
+
+            if (
+                stars >= 30
+            ) {
 
                 return `
-                    <span class="rank-icon">💎</span>
+                    <span
+                        class="rank-icon"
+                    >
+                        💎
+                    </span>
                     Diamond
                 `;
-
             }
 
-            if (stars >= 20) {
+
+            if (
+                stars >= 20
+            ) {
 
                 return `
-                    <span class="rank-icon">🔮</span>
+                    <span
+                        class="rank-icon"
+                    >
+                        🔮
+                    </span>
                     Platinum
                 `;
-
             }
 
-            if (stars >= 15) {
+
+            if (
+                stars >= 15
+            ) {
 
                 return `
-                    <span class="rank-icon">🥇</span>
+                    <span
+                        class="rank-icon"
+                    >
+                        🥇
+                    </span>
                     Gold
                 `;
-
             }
 
-            if (stars >= 10) {
+
+            if (
+                stars >= 10
+            ) {
 
                 return `
-                    <span class="rank-icon">🥈</span>
+                    <span
+                        class="rank-icon"
+                    >
+                        🥈
+                    </span>
                     Silver
                 `;
-
             }
 
+
             return `
-                <span class="rank-icon">🥉</span>
+                <span
+                    class="rank-icon"
+                >
+                    🥉
+                </span>
                 Bronze
             `;
         }
 
 
-
         /* ==========================================
-           ป้องกันข้อความ HTML จากชื่อผู้เล่น
+           ป้องกัน HTML Injection
         ========================================== */
 
-        function escapeHTML(value) {
+        function escapeHTML(
+            value
+        ) {
 
-            return String(value)
+            return String(
+                value
+            )
 
-                .replace(/&/g, "&amp;")
+            .replace(
+                /&/g,
+                "&amp;"
+            )
 
-                .replace(/</g, "&lt;")
+            .replace(
+                /</g,
+                "&lt;"
+            )
 
-                .replace(/>/g, "&gt;")
+            .replace(
+                />/g,
+                "&gt;"
+            )
 
-                .replace(/"/g, "&quot;")
+            .replace(
+                /"/g,
+                "&quot;"
+            )
 
-                .replace(/'/g, "&#039;");
+            .replace(
+                /'/g,
+                "&#039;"
+            );
         }
 
 
+        /* ==========================================
+           แสดง Error
+        ========================================== */
+
+        function showBoardError(
+            message
+        ) {
+
+            const tbody =
+                document
+                    .getElementById(
+                        "leaderboard-body"
+                    );
+
+
+            tbody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="error-message"
+                    >
+
+                        ❌
+                        ${escapeHTML(
+                            message
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `;
+        }
+
 
         /* ==========================================
-           โหลด Leaderboard แบบ Real-time
+           โหลด Leaderboard
         ========================================== */
 
         function startLeaderboard() {
 
             const tbody =
-                document.getElementById(
-                    'leaderboard-body'
-                );
+                document
+                    .getElementById(
+                        "leaderboard-body"
+                    );
 
-
-            /*
-                ตรวจว่าตัวแปร db
-                จาก firebase-config.js มีหรือไม่
-            */
 
             if (
-                typeof db === 'undefined'
+                typeof db ===
+                "undefined"
             ) {
 
-                console.error(
-                    "Firebase database (db) is not defined"
+                showBoardError(
+                    "ไม่พบการเชื่อมต่อฐานข้อมูล กรุณาตรวจสอบ firebase-config.js"
                 );
-
-                tbody.innerHTML = `
-                    <tr>
-                        <td
-                            colspan="5"
-                            class="error-message"
-                        >
-                            ❌ ไม่พบการเชื่อมต่อฐานข้อมูล
-                            กรุณาตรวจสอบ firebase-config.js
-                        </td>
-                    </tr>
-                `;
 
                 return;
             }
 
 
-            /*
-                อ่าน leaderboard แบบ Real-time
-            */
+            db
+                .ref(
+                    "leaderboard"
+                )
+                .on(
 
-            db.ref('leaderboard').on(
+                    "value",
 
-                'value',
+                    function(
+                        snapshot
+                    ) {
 
-                function(snapshot) {
+                        /*
+                        ไม่มีผู้เล่น
+                        */
 
-                    tbody.innerHTML = '';
+                        if (
+                            !snapshot.exists()
+                        ) {
 
+                            tbody.innerHTML = `
 
-                    /*
-                        ไม่มีข้อมูล
-                    */
+                                <tr>
 
-                    if (!snapshot.exists()) {
+                                    <td
+                                        colspan="5"
+                                    >
 
-                        tbody.innerHTML = `
-                            <tr>
-                                <td colspan="5">
+                                        ยังไม่มีนักเรียน
+                                        เปิดร้านซ่อมคอม
+                                        ในคาบนี้...
 
-                                    ยังไม่มีนักเรียนเปิดร้านซ่อมคอม
-                                    ในคาบนี้...
+                                    </td>
 
-                                </td>
-                            </tr>
-                        `;
-
-                        return;
-                    }
-
-
-                    /*
-                        แปลง Firebase Object
-                        เป็น Array
-                    */
-
-                    const players = [];
-
-
-                    snapshot.forEach(
-
-                        function(childSnapshot) {
-
-                            const data =
-                                childSnapshot.val() || {};
-
-
-                            players.push({
-
-                                uid:
-                                    childSnapshot.key,
-
-                                shopName:
-                                    data.shopName ||
-                                    'ไม่ระบุชื่อ',
-
-                                stars:
-                                    Number(
-                                        data.stars
-                                    ) || 0,
-
-                                gold:
-                                    Number(
-                                        data.gold
-                                    ) || 0
-
-                            });
-
-                        }
-
-                    );
-
-
-                    /*
-                        เรียงอันดับ
-
-                        1. ดาวมากกว่า
-                        2. ถ้าดาวเท่ากัน เงินมากกว่า
-                    */
-
-                    players.sort(
-
-                        function(a, b) {
-
-                            if (
-                                b.stars !== a.stars
-                            ) {
-
-                                return (
-                                    b.stars -
-                                    a.stars
-                                );
-
-                            }
-
-                            return (
-                                b.gold -
-                                a.gold
-                            );
-
-                        }
-
-                    );
-
-
-                    /*
-                        สร้างตาราง
-                    */
-
-                    players.forEach(
-
-                        function(player, index) {
-
-                            const tr =
-                                document.createElement(
-                                    'tr'
-                                );
-
-
-                            /*
-                                อันดับ Top 3
-                            */
-
-                            let position =
-                                index + 1;
-
-
-                            if (index === 0) {
-
-                                position =
-                                    '🥇 1';
-
-                            }
-
-                            else if (
-                                index === 1
-                            ) {
-
-                                position =
-                                    '🥈 2';
-
-                            }
-
-                            else if (
-                                index === 2
-                            ) {
-
-                                position =
-                                    '🥉 3';
-
-                            }
-
-
-                            tr.innerHTML = `
-
-                                <td>
-                                    <b>
-                                        ${position}
-                                    </b>
-                                </td>
-
-
-                                <td>
-                                    <b>
-                                        ${escapeHTML(
-                                            player.shopName
-                                        )}
-                                    </b>
-                                </td>
-
-
-                                <td>
-
-                                    ${getRankDisplay(
-                                        player.stars
-                                    )}
-
-                                </td>
-
-
-                                <td
-                                    style="
-                                        color:#f59e0b;
-                                    "
-                                >
-
-                                    <b>
-
-                                        ${player.stars}
-                                        ⭐
-
-                                    </b>
-
-                                </td>
-
-
-                                <td
-                                    style="
-                                        color:#10b981;
-                                    "
-                                >
-
-                                    <b>
-
-                                        $${player.gold}
-
-                                    </b>
-
-                                </td>
+                                </tr>
 
                             `;
 
-
-                            tbody.appendChild(tr);
-
+                            return;
                         }
 
-                    );
 
-                },
+                        /*
+                        แปลง Firebase
+                        Object เป็น Array
+                        */
+
+                        const players =
+                            [];
 
 
-                /*
+                        snapshot
+                            .forEach(
+
+                                function(
+                                    childSnapshot
+                                ) {
+
+                                    const data =
+                                        childSnapshot
+                                            .val()
+                                        || {};
+
+
+                                    players.push({
+
+                                        uid:
+                                            childSnapshot.key,
+
+                                        shopName:
+                                            data.shopName
+                                            ||
+                                            "ไม่ระบุชื่อ",
+
+                                        stars:
+                                            Number(
+                                                data.stars
+                                            ) || 0,
+
+                                        gold:
+                                            Number(
+                                                data.gold
+                                            ) || 0
+
+                                    });
+
+                                }
+
+                            );
+
+
+                        /*
+                        เรียงอันดับ
+
+                        1. ดาวมากกว่า
+                        2. ถ้าดาวเท่ากัน
+                           เงินมากกว่า
+                        */
+
+                        players.sort(
+
+                            function(
+                                a,
+                                b
+                            ) {
+
+                                if (
+                                    b.stars
+                                    !==
+                                    a.stars
+                                ) {
+
+                                    return (
+                                        b.stars
+                                        -
+                                        a.stars
+                                    );
+                                }
+
+
+                                return (
+                                    b.gold
+                                    -
+                                    a.gold
+                                );
+                            }
+
+                        );
+
+
+                        tbody.innerHTML =
+                            "";
+
+
+                        /*
+                        สร้างแถว
+                        */
+
+                        players.forEach(
+
+                            function(
+                                player,
+                                index
+                            ) {
+
+                                let position =
+                                    index + 1;
+
+
+                                if (
+                                    index === 0
+                                ) {
+
+                                    position =
+                                        "🥇 1";
+                                }
+
+                                else if (
+                                    index === 1
+                                ) {
+
+                                    position =
+                                        "🥈 2";
+                                }
+
+                                else if (
+                                    index === 2
+                                ) {
+
+                                    position =
+                                        "🥉 3";
+                                }
+
+
+                                const tr =
+                                    document
+                                        .createElement(
+                                            "tr"
+                                        );
+
+
+                                tr.innerHTML = `
+
+                                    <td>
+
+                                        <b>
+                                            ${position}
+                                        </b>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <b>
+
+                                            ${escapeHTML(
+                                                player.shopName
+                                            )}
+
+                                        </b>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        ${getRankDisplay(
+                                            player.stars
+                                        )}
+
+                                    </td>
+
+
+                                    <td
+                                        style="
+                                            color:#f59e0b;
+                                        "
+                                    >
+
+                                        <b>
+
+                                            ${player.stars}
+                                            ⭐
+
+                                        </b>
+
+                                    </td>
+
+
+                                    <td
+                                        style="
+                                            color:#10b981;
+                                        "
+                                    >
+
+                                        <b>
+
+                                            $${player.gold}
+
+                                        </b>
+
+                                    </td>
+
+                                `;
+
+
+                                tbody.appendChild(
+                                    tr
+                                );
+                            }
+
+                        );
+
+                    },
+
+
+                    /*
                     Firebase Error
-                */
+                    */
 
-                function(error) {
-
-                    console.error(
-                        "Leaderboard Firebase Error:",
+                    function(
                         error
-                    );
+                    ) {
+
+                        console.error(
+                            "Leaderboard Firebase Error:",
+                            error
+                        );
 
 
-                    tbody.innerHTML = `
+                        showBoardError(
 
-                        <tr>
+                            "โหลดข้อมูลไม่ได้: "
+                            +
+                            error.message
 
-                            <td
-                                colspan="5"
-                                class="error-message"
-                            >
+                        );
+                    }
 
-                                ❌ โหลดข้อมูลไม่ได้
-
-                                <br><br>
-
-                                ${escapeHTML(
-                                    error.message
-                                )}
-
-                                <br><br>
-
-                                <small>
-
-                                    กรุณาตรวจสอบ
-                                    Firebase Realtime Database Rules
-
-                                </small>
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-
-            );
-
+                );
         }
 
 
-
         /* ==========================================
-           เริ่ม Leaderboard
+           รอ Firebase Authentication
+           ก่อนโหลด Leaderboard
         ========================================== */
 
-        ensureAnonymousAuth()
-            .then(() => {
-                console.log("Leaderboard authenticated");
+        async function bootLeaderboard() {
+
+            try {
+
+                if (
+                    typeof ensureAnonymousAuth
+                    !==
+                    "function"
+                ) {
+
+                    throw new Error(
+                        "ไม่พบ ensureAnonymousAuth() ใน firebase-config.js"
+                    );
+                }
+
+
+                await
+                    ensureAnonymousAuth();
+
+
+                console.log(
+                    "Leaderboard authenticated"
+                );
+
+
                 startLeaderboard();
-            })
-            .catch((error) => {
-                console.error("Leaderboard auth error:", error);
 
-                const tbody = document.getElementById('leaderboard-body');
+            }
 
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="error-message">
-                            ❌ เชื่อมต่อระบบผู้ใช้ไม่ได้
-                            <br><br>
-                            ${escapeHTML(error.message)}
-                        </td>
-                    </tr>
-                `;
-            });
+            catch (
+                error
+            ) {
 
+                console.error(
+                    "Leaderboard auth error:",
+                    error
+                );
+
+
+                showBoardError(
+
+                    "เชื่อมต่อระบบผู้ใช้ไม่ได้: "
+                    +
+                    error.message
+
+                );
+            }
+        }
 
 
         /* ==========================================
-           เปิดหน้าต่าง Admin
+           เปิด Admin Modal
         ========================================== */
 
         function openAdminModal() {
 
             document
                 .getElementById(
-                    'admin-modal'
+                    "admin-modal"
                 )
                 .classList
-                .remove('hidden');
+                .remove(
+                    "hidden"
+                );
 
 
             document
                 .getElementById(
-                    'admin-email'
+                    "admin-email"
                 )
-                .value = '';
+                .value =
+                "";
 
 
             document
                 .getElementById(
-                    'admin-password'
+                    "admin-password"
                 )
-                .value = '';
+                .value =
+                "";
 
 
-            setTimeout(function() {
+            setTimeout(
 
-                document
-                    .getElementById(
-                        'admin-email'
-                    )
-                    .focus();
+                function() {
 
-            }, 100);
+                    document
+                        .getElementById(
+                            "admin-email"
+                        )
+                        .focus();
 
+                },
+
+                100
+
+            );
         }
 
 
-
         /* ==========================================
-           ปิดหน้าต่าง Admin
+           ปิด Admin Modal
         ========================================== */
 
         function closeAdminModal() {
 
             document
                 .getElementById(
-                    'admin-modal'
+                    "admin-modal"
                 )
                 .classList
-                .add('hidden');
-
+                .add(
+                    "hidden"
+                );
         }
-
 
 
         /* ==========================================
@@ -1213,7 +1174,7 @@ board.html
             const adminEmail =
                 document
                     .getElementById(
-                        'admin-email'
+                        "admin-email"
                     )
                     .value
                     .trim();
@@ -1222,13 +1183,14 @@ board.html
             const adminPassword =
                 document
                     .getElementById(
-                        'admin-password'
+                        "admin-password"
                     )
                     .value;
 
 
             if (
-                !adminEmail ||
+                !adminEmail
+                ||
                 !adminPassword
             ) {
 
@@ -1237,7 +1199,6 @@ board.html
                 );
 
                 return;
-
             }
 
 
@@ -1247,22 +1208,26 @@ board.html
             try {
 
                 /*
-                    Login ด้วยบัญชีครู
+                Login ผู้สอน
                 */
 
                 await auth
                     .signInWithEmailAndPassword(
+
                         adminEmail,
                         adminPassword
+
                     );
 
 
                 /*
-                    ล้าง leaderboard
+                ล้าง Leaderboard
                 */
 
                 await db
-                    .ref('leaderboard')
+                    .ref(
+                        "leaderboard"
+                    )
                     .remove();
 
 
@@ -1272,29 +1237,25 @@ board.html
 
 
                 /*
-                    Logout หลังทำงานเสร็จ
+                Logout Admin
                 */
 
-                await auth.signOut();
+                await
+                    auth.signOut();
 
 
                 /*
-                    กลับเข้าสู่ Anonymous
-                    เพื่อให้ board อ่านข้อมูลต่อได้
+                กลับเข้า Anonymous
                 */
 
-                if (
-                    typeof ensureAnonymousAuth ===
-                    'function'
-                ) {
-
-                    await ensureAnonymousAuth();
-
-                }
+                await
+                    ensureAnonymousAuth();
 
             }
 
-            catch(error) {
+            catch (
+                error
+            ) {
 
                 console.error(
                     "Clear leaderboard error:",
@@ -1303,82 +1264,83 @@ board.html
 
 
                 alert(
-                    "❌ ไม่สามารถล้างกระดานได้\n\n" +
-                    "กรุณาตรวจสอบอีเมล รหัสผ่าน และ Firebase Rules"
+
+                    "❌ ไม่สามารถล้างกระดานได้\n\n"
+                    +
+                    error.message
+
                 );
 
 
                 try {
 
-                    await auth.signOut();
+                    await
+                        auth.signOut();
 
                 }
 
-                catch(signOutError) {
+                catch (
+                    signOutError
+                ) {
 
                     console.error(
                         signOutError
                     );
-
                 }
 
 
-                /*
-                    คืน Anonymous Session
-                */
+                try {
 
-                if (
-                    typeof ensureAnonymousAuth ===
-                    'function'
+                    await
+                        ensureAnonymousAuth();
+
+                }
+
+                catch (
+                    authError
                 ) {
 
-                    try {
-
-                        await ensureAnonymousAuth();
-
-                    }
-
-                    catch(authError) {
-
-                        console.error(
-                            authError
-                        );
-
-                    }
-
+                    console.error(
+                        authError
+                    );
                 }
-
             }
-
         }
 
 
-
         /* ==========================================
-           กด Enter ตอนกรอกรหัสผ่าน
+           Enter = ล้างกระดาน
         ========================================== */
 
         document
             .getElementById(
-                'admin-password'
+                "admin-password"
             )
             .addEventListener(
 
-                'keydown',
+                "keydown",
 
-                function(event) {
+                function(
+                    event
+                ) {
 
                     if (
-                        event.key === 'Enter'
+                        event.key ===
+                        "Enter"
                     ) {
 
                         confirmClearBoard();
-
                     }
-
                 }
 
             );
+
+
+        /* ==========================================
+           START
+        ========================================== */
+
+        bootLeaderboard();
 
     </script>
 
