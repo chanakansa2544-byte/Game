@@ -86,15 +86,13 @@
     <script src="firebase-config.js"></script> <!-- ดึง Config ตัวเดียวกับที่เกมใช้มาเลย -->
 
     <script>
-        const db = firebase.database();
-        const auth = firebase.auth();
 
         function getRankDisplay(stars) {
-            if(stars >= 20) return `<span class="rank-icon">👑</span> Conqueror`;
-            if(stars >= 16) return `<span class="rank-icon">💎</span> Diamond`;
-            if(stars >= 12) return `<span class="rank-icon">🔮</span> Platinum`;
-            if(stars >= 8)  return `<span class="rank-icon">🥇</span> Gold`;
-            if(stars >= 4)  return `<span class="rank-icon">🥈</span> Silver`;
+            if(stars >= 50) return `<span class="rank-icon">👑</span> Conqueror`;
+            if(stars >= 30) return `<span class="rank-icon">💎</span> Diamond`;
+            if(stars >= 20) return `<span class="rank-icon">🔮</span> Platinum`;
+            if(stars >= 15)  return `<span class="rank-icon">🥇</span> Gold`;
+            if(stars >= 10)  return `<span class="rank-icon">🥈</span> Silver`;
             return `<span class="rank-icon">🥉</span> Bronze`;
         }
 
@@ -128,7 +126,22 @@
                 `;
                 tbody.appendChild(tr);
             });
-        });
+          },
+
+    (error) => {
+        console.error("Leaderboard error:", error);
+
+        const tbody = document.getElementById('leaderboard-body');
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="color:#ef4444;">
+                    ❌ โหลดข้อมูลไม่ได้: ${error.message}
+                </td>
+            </tr>
+        `;
+    }
+);
 
         // ==========================================
         // ระบบป๊อปอัปยืนยันตัวตนสำหรับล้างกระดาน
