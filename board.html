@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Live Leaderboard - PC Detective</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Live Leaderboard - PC Detective
+    </title>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap"
@@ -12,224 +20,18 @@
     >
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
         body {
+
             margin: 0;
+
             min-height: 100vh;
-            padding: 20px;
-
-            background: #0f172a;
-            color: #f8fafc;
-
-            font-family: 'Noto Sans Thai', sans-serif;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            margin: 0 0 6px;
-
-            color: #3b82f6;
-
-            font-size: clamp(
-                1.8rem,
-                4vw,
-                2.7rem
-            );
-        }
-
-        .header p {
-            margin: 0;
-            color: #cbd5e1;
-        }
-
-        .btn-clear {
-            position: absolute;
-
-            top: 20px;
-            right: 20px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            padding: 10px 18px;
-
-            background: #ef4444;
-            color: white;
-
-            font-weight: bold;
-            font-size: 15px;
-
-            cursor: pointer;
-        }
-
-        .btn-clear:hover {
-            background: #dc2626;
-        }
-
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            max-width: 1000px;
-
-            margin: 0 auto;
-
-            border-collapse: collapse;
-
-            overflow: hidden;
-
-            border-radius: 12px;
-
-            background: #1e293b;
-
-            box-shadow:
-                0 4px 10px
-                rgba(0, 0, 0, 0.3);
-        }
-
-        th,
-        td {
-            padding: 15px;
-
-            text-align: center;
-
-            border-bottom:
-                1px solid #334155;
-
-            font-size: 17px;
-        }
-
-        th {
-            background: #3b82f6;
-            color: white;
-
-            font-size: 18px;
-        }
-
-        tr:nth-child(even) {
-            background: #0f172a;
-        }
-
-        .rank-icon {
-            font-size: 22px;
-            margin-right: 5px;
-        }
-
-        .loading {
-            color: #94a3b8;
-        }
-
-        .error-message {
-            padding: 25px;
-            color: #ef4444;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* =========================
-           ADMIN MODAL
-        ========================= */
-
-        .modal-overlay {
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 1000;
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
 
             padding: 20px;
-
-            background:
-                rgba(0, 0, 0, 0.85);
-
-            backdrop-filter:
-                blur(3px);
-        }
-
-        .modal-card {
-            width: min(
-                360px,
-                100%
-            );
-
-            padding: 25px;
-
-            border-radius: 12px;
-
-            border-top:
-                4px solid #ef4444;
-
-            background:
-                #1e293b;
-
-            text-align: center;
-
-            box-shadow:
-                0 10px 25px
-                rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-title {
-            margin-bottom: 10px;
-
-            color: #ef4444;
-
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .modal-description {
-            margin-bottom: 20px;
-
-            color: #cbd5e1;
-
-            font-size: 14px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-
-            margin-bottom: 5px;
-
-            color: #94a3b8;
-
-            font-size: 14px;
-        }
-
-        .input-group input {
-            width: 100%;
-
-            padding: 10px;
-
-            border:
-                1px solid #334155;
-
-            border-radius: 6px;
-
-            outline: none;
 
             background:
                 #0f172a;
@@ -237,1112 +39,1342 @@
             color:
                 #f8fafc;
 
-            font-size: 16px;
+            font-family:
+                'Noto Sans Thai',
+                sans-serif;
         }
 
-        .input-group input:focus {
-            border-color:
+
+        .header {
+
+            text-align:
+                center;
+
+            margin-bottom:
+                30px;
+        }
+
+
+        h1 {
+
+            margin:
+                0 0 6px;
+
+            color:
                 #3b82f6;
+
+            font-size:
+                clamp(
+                    1.8rem,
+                    4vw,
+                    2.7rem
+                );
         }
 
-        .modal-buttons {
-            display: flex;
 
-            gap: 10px;
+        .header p {
 
-            margin-top: 20px;
+            margin: 0;
+
+            color:
+                #cbd5e1;
         }
 
-        .modal-buttons button {
-            flex: 1;
+
+        .btn-clear {
+
+            position:
+                absolute;
+
+            top: 20px;
+
+            right: 20px;
 
             border: none;
 
-            border-radius: 6px;
+            border-radius:
+                8px;
 
-            padding: 10px;
+            padding:
+                10px 18px;
 
-            color: white;
+            background:
+                #ef4444;
 
-            font-size: 16px;
+            color:
+                white;
 
-            cursor: pointer;
+            font-weight:
+                bold;
+
+            cursor:
+                pointer;
         }
 
+
+        .table-container {
+
+            width:
+                100%;
+
+            overflow-x:
+                auto;
+        }
+
+
+        table {
+
+            width:
+                100%;
+
+            max-width:
+                1150px;
+
+            margin:
+                0 auto;
+
+            border-collapse:
+                collapse;
+
+            overflow:
+                hidden;
+
+            border-radius:
+                12px;
+
+            background:
+                #1e293b;
+
+            box-shadow:
+                0 4px 10px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .3
+                );
+        }
+
+
+        th,
+        td {
+
+            padding:
+                15px;
+
+            text-align:
+                center;
+
+            border-bottom:
+                1px solid
+                #334155;
+
+            font-size:
+                16px;
+        }
+
+
+        th {
+
+            background:
+                #3b82f6;
+
+            color:
+                white;
+
+            font-size:
+                17px;
+        }
+
+
+        tr:nth-child(
+            even
+        ) {
+
+            background:
+                #0f172a;
+        }
+
+
+        .rank-icon {
+
+            margin-right:
+                5px;
+
+            font-size:
+                21px;
+        }
+
+
+        .accuracy-good {
+
+            color:
+                #10b981;
+
+            font-weight:
+                bold;
+        }
+
+
+        .accuracy-medium {
+
+            color:
+                #f59e0b;
+
+            font-weight:
+                bold;
+        }
+
+
+        .accuracy-bad {
+
+            color:
+                #ef4444;
+
+            font-weight:
+                bold;
+        }
+
+
+        .loading {
+
+            color:
+                #94a3b8;
+        }
+
+
+        .error-message {
+
+            color:
+                #ef4444;
+
+            padding:
+                25px;
+        }
+
+
+        .hidden {
+
+            display:
+                none !important;
+        }
+
+
+        .modal-overlay {
+
+            position:
+                fixed;
+
+            inset: 0;
+
+            z-index:
+                1000;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            padding:
+                20px;
+
+            background:
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .85
+                );
+
+            backdrop-filter:
+                blur(
+                    3px
+                );
+        }
+
+
+        .modal-card {
+
+            width:
+                min(
+                    360px,
+                    100%
+                );
+
+            padding:
+                25px;
+
+            border-radius:
+                12px;
+
+            border-top:
+                4px solid
+                #ef4444;
+
+            background:
+                #1e293b;
+
+            text-align:
+                center;
+        }
+
+
+        .modal-title {
+
+            margin-bottom:
+                10px;
+
+            color:
+                #ef4444;
+
+            font-size:
+                20px;
+
+            font-weight:
+                bold;
+        }
+
+
+        .modal-description {
+
+            margin-bottom:
+                20px;
+
+            color:
+                #cbd5e1;
+
+            font-size:
+                14px;
+        }
+
+
+        .input-group {
+
+            margin-bottom:
+                15px;
+
+            text-align:
+                left;
+        }
+
+
+        .input-group label {
+
+            display:
+                block;
+
+            margin-bottom:
+                5px;
+
+            color:
+                #94a3b8;
+        }
+
+
+        .input-group input {
+
+            width:
+                100%;
+
+            padding:
+                10px;
+
+            border:
+                1px solid
+                #334155;
+
+            border-radius:
+                6px;
+
+            background:
+                #0f172a;
+
+            color:
+                white;
+
+            outline:
+                none;
+        }
+
+
+        .modal-buttons {
+
+            display:
+                flex;
+
+            gap:
+                10px;
+        }
+
+
+        .modal-buttons button {
+
+            flex: 1;
+
+            padding:
+                10px;
+
+            border:
+                none;
+
+            border-radius:
+                6px;
+
+            color:
+                white;
+
+            cursor:
+                pointer;
+        }
+
+
         .btn-cancel {
+
             background:
                 #64748b;
         }
 
+
         .btn-confirm {
+
             background:
                 #ef4444;
-
-            font-weight: bold;
         }
 
-        /* =========================
-           RESPONSIVE
-        ========================= */
 
         @media (
             max-width: 800px
         ) {
 
-            body {
-                padding: 15px;
-            }
-
             .btn-clear {
-                position: static;
 
-                display: block;
+                position:
+                    static;
+
+                display:
+                    block;
 
                 margin:
-                    0 0 20px auto;
+                    0 0 20px
+                    auto;
             }
+
 
             th,
             td {
-                padding:
-                    12px 10px;
-
-                font-size:
-                    15px;
 
                 white-space:
                     nowrap;
-            }
-        }
-
-        @media (
-            max-width: 480px
-        ) {
-
-            body {
-                padding: 10px;
-            }
-
-            .btn-clear {
-                width: 100%;
-            }
-
-            .header p {
-                font-size: 13px;
-            }
-
-            th,
-            td {
-                padding:
-                    10px 8px;
 
                 font-size:
-                    13px;
+                    14px;
+
+                padding:
+                    12px 9px;
             }
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <!-- =========================
-         ปุ่มล้างคะแนน
-    ========================== -->
 
-    <button
-        class="btn-clear"
-        onclick="openAdminModal()"
-    >
-        🗑️ ล้างคะแนนเริ่มคาบใหม่
-    </button>
+<button
+    class="btn-clear"
+    onclick="openAdminModal()"
+>
+    🗑️ ล้างคะแนนเริ่มคาบใหม่
+</button>
 
 
-    <!-- =========================
-         Header
-    ========================== -->
+<div
+    class="header"
+>
 
-    <div class="header">
+    <h1>
+        🏆 LIVE LEADERBOARD
+    </h1>
 
-        <h1>
-            🏆 LIVE LEADERBOARD
-        </h1>
+    <p>
+        ตารางอันดับช่างซ่อมคอมพิวเตอร์ประจำคาบเรียน
+        (Real-time)
+    </p>
 
-        <p>
-            ตารางอันดับช่างซ่อมคอมพิวเตอร์ประจำคาบเรียน
-            (Real-time)
-        </p>
-
-    </div>
+</div>
 
 
-    <!-- =========================
-         Leaderboard
-    ========================== -->
+<div
+    class="table-container"
+>
 
-    <div class="table-container">
+<table>
 
-        <table>
+<thead>
 
-            <thead>
+<tr>
 
-                <tr>
+    <th>
+        อันดับ
+    </th>
 
-                    <th>
-                        อันดับ
-                    </th>
+    <th>
+        ชื่อร้านค้า / นักเรียน
+    </th>
 
-                    <th>
-                        ชื่อร้านค้า / นักเรียน
-                    </th>
+    <th>
+        Rank
+    </th>
 
-                    <th>
-                        Rank ปัจจุบัน
-                    </th>
+    <th>
+        ดาว ⭐
+    </th>
 
-                    <th>
-                        จำนวนดาว (⭐)
-                    </th>
+    <th>
+        Accuracy 🎯
+    </th>
 
-                    <th>
-                        เงินสะสม (💰)
-                    </th>
+    <th>
+        เงิน 💰
+    </th>
 
-                </tr>
+</tr>
 
-            </thead>
-
-
-            <tbody
-                id="leaderboard-body"
-            >
-
-                <tr>
-
-                    <td
-                        colspan="5"
-                        class="loading"
-                    >
-                        ⏳ กำลังเชื่อมต่อ Firebase...
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
-    </div>
+</thead>
 
 
-    <!-- =========================
-         Admin Login Modal
-    ========================== -->
+<tbody
+    id="leaderboard-body"
+>
 
-    <div
-        id="admin-modal"
-        class="modal-overlay hidden"
-    >
+<tr>
 
-        <div
-            class="modal-card"
-        >
+<td
+    colspan="6"
+    class="loading"
+>
 
-            <div
-                class="modal-title"
-            >
-                🔒 ยืนยันตัวตนผู้สอน
-            </div>
+    ⏳ กำลังเชื่อมต่อ Firebase...
 
+</td>
 
-            <div
-                class="modal-description"
-            >
-                กรุณาเข้าสู่ระบบ
-                เพื่อล้างกระดานคะแนน
-            </div>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
 
 
-            <div
-                class="input-group"
-            >
+<div
+    id="admin-modal"
+    class="modal-overlay hidden"
+>
 
-                <label
-                    for="admin-email"
-                >
-                    📧 อีเมล:
-                </label>
+<div
+    class="modal-card"
+>
 
-                <input
-                    type="email"
-                    id="admin-email"
-                    placeholder="admin@poly.ac.th"
-                    autocomplete="username"
-                >
+<div
+    class="modal-title"
+>
 
-            </div>
+    🔒 ยืนยันตัวตนผู้สอน
+
+</div>
 
 
-            <div
-                class="input-group"
-            >
+<div
+    class="modal-description"
+>
 
-                <label
-                    for="admin-password"
-                >
-                    🔑 รหัสผ่าน:
-                </label>
+    กรุณาเข้าสู่ระบบ
+    เพื่อล้างกระดานคะแนน
 
-                <input
-                    type="password"
-                    id="admin-password"
-                    placeholder="••••••••"
-                    autocomplete="current-password"
-                >
-
-            </div>
+</div>
 
 
-            <div
-                class="modal-buttons"
-            >
+<div
+    class="input-group"
+>
 
-                <button
-                    class="btn-cancel"
-                    onclick="closeAdminModal()"
-                >
-                    ยกเลิก
-                </button>
+<label>
+    📧 อีเมล
+</label>
 
-                <button
-                    class="btn-confirm"
-                    onclick="confirmClearBoard()"
-                >
-                    ล้างกระดาน
-                </button>
+<input
+    type="email"
+    id="admin-email"
+    autocomplete="username"
+>
 
-            </div>
-
-        </div>
-
-    </div>
+</div>
 
 
-    <!-- =========================
-         Firebase SDK
-    ========================== -->
+<div
+    class="input-group"
+>
 
-    <script
-        src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
-    ></script>
+<label>
+    🔑 รหัสผ่าน
+</label>
 
-    <script
-        src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"
-    ></script>
+<input
+    type="password"
+    id="admin-password"
+    autocomplete="current-password"
+>
 
-    <script
-        src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"
-    ></script>
-
-    <script
-        src="firebase-config.js"
-    ></script>
+</div>
 
 
-    <script>
+<div
+    class="modal-buttons"
+>
 
-        /* ==========================================
-           Rank
-           
-           Bronze      0 - 9
-           Silver     10 - 14
-           Gold       15 - 19
-           Platinum   20 - 29
-           Diamond    30 - 49
-           Conqueror  50+
-        ========================================== */
+<button
+    class="btn-cancel"
+    onclick="closeAdminModal()"
+>
 
-        function getRankDisplay(
+    ยกเลิก
+
+</button>
+
+
+<button
+    class="btn-confirm"
+    onclick="confirmClearBoard()"
+>
+
+    ล้างกระดาน
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script
+    src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
+></script>
+
+<script
+    src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"
+></script>
+
+<script
+    src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"
+></script>
+
+<script
+    src="firebase-config.js"
+></script>
+
+
+<script>
+
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value
+    )
+
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+
+    .replace(
+        /</g,
+        "&lt;"
+    )
+
+    .replace(
+        />/g,
+        "&gt;"
+    )
+
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+}
+
+
+// ===============================
+// Rank
+// ===============================
+
+function getRankDisplay(
+    stars
+) {
+
+    stars =
+        Number(
             stars
-        ) {
-
-            stars =
-                Number(
-                    stars
-                ) || 0;
+        ) || 0;
 
 
-            if (
-                stars >= 50
-            ) {
+    if (
+        stars >= 50
+    ) {
 
-                return `
-                    <span
-                        class="rank-icon"
-                    >
-                        👑
-                    </span>
-                    Conqueror
-                `;
-            }
+        return `
+            <span class="rank-icon">
+                👑
+            </span>
+            Conqueror
+        `;
+    }
 
 
-            if (
-                stars >= 30
-            ) {
+    if (
+        stars >= 30
+    ) {
 
-                return `
-                    <span
-                        class="rank-icon"
-                    >
-                        💎
-                    </span>
-                    Diamond
-                `;
-            }
+        return `
+            <span class="rank-icon">
+                💎
+            </span>
+            Diamond
+        `;
+    }
 
 
-            if (
-                stars >= 20
-            ) {
+    if (
+        stars >= 20
+    ) {
 
-                return `
-                    <span
-                        class="rank-icon"
-                    >
-                        🔮
-                    </span>
-                    Platinum
-                `;
-            }
+        return `
+            <span class="rank-icon">
+                🔮
+            </span>
+            Platinum
+        `;
+    }
 
 
-            if (
-                stars >= 15
-            ) {
+    if (
+        stars >= 15
+    ) {
 
-                return `
-                    <span
-                        class="rank-icon"
-                    >
-                        🥇
-                    </span>
-                    Gold
-                `;
-            }
+        return `
+            <span class="rank-icon">
+                🥇
+            </span>
+            Gold
+        `;
+    }
 
 
-            if (
-                stars >= 10
-            ) {
+    if (
+        stars >= 10
+    ) {
 
-                return `
-                    <span
-                        class="rank-icon"
-                    >
-                        🥈
-                    </span>
-                    Silver
-                `;
-            }
+        return `
+            <span class="rank-icon">
+                🥈
+            </span>
+            Silver
+        `;
+    }
 
 
-            return `
-                <span
-                    class="rank-icon"
-                >
-                    🥉
-                </span>
-                Bronze
-            `;
-        }
+    return `
+        <span class="rank-icon">
+            🥉
+        </span>
+        Bronze
+    `;
+}
 
 
-        /* ==========================================
-           ป้องกัน HTML Injection
-        ========================================== */
+// ===============================
+// Accuracy
+// ===============================
 
-        function escapeHTML(
-            value
-        ) {
+function getAccuracyHTML(
+    accuracy,
+    totalAttempts
+) {
 
-            return String(
-                value
-            )
+    accuracy =
+        Number(
+            accuracy
+        ) || 0;
 
-            .replace(
-                /&/g,
-                "&amp;"
-            )
 
-            .replace(
-                /</g,
-                "&lt;"
-            )
+    totalAttempts =
+        Number(
+            totalAttempts
+        ) || 0;
 
-            .replace(
-                />/g,
-                "&gt;"
-            )
 
-            .replace(
-                /"/g,
-                "&quot;"
-            )
+    if (
+        totalAttempts ===
+        0
+    ) {
 
-            .replace(
-                /'/g,
-                "&#039;"
+        return `
+            <span
+                style="
+                    color:#94a3b8;
+                "
+            >
+                -
+            </span>
+        `;
+    }
+
+
+    let className =
+        "accuracy-bad";
+
+
+    if (
+        accuracy >=
+        80
+    ) {
+
+        className =
+            "accuracy-good";
+
+    } else if (
+        accuracy >=
+        60
+    ) {
+
+        className =
+            "accuracy-medium";
+    }
+
+
+    return `
+        <span
+            class="${className}"
+        >
+            ${accuracy}%
+        </span>
+    `;
+}
+
+
+// ===============================
+// Error
+// ===============================
+
+function showBoardError(
+    message
+) {
+
+    document
+        .getElementById(
+            "leaderboard-body"
+        )
+        .innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="6"
+                class="error-message"
+            >
+
+                ❌
+                ${escapeHTML(
+                    message
+                )}
+
+            </td>
+
+        </tr>
+
+    `;
+}
+
+
+// ===============================
+// Leaderboard
+// ===============================
+
+function startLeaderboard() {
+
+    const tbody =
+        document
+            .getElementById(
+                "leaderboard-body"
             );
-        }
 
 
-        /* ==========================================
-           แสดง Error
-        ========================================== */
+    db
+        .ref(
+            "leaderboard"
+        )
 
-        function showBoardError(
-            message
-        ) {
+        .on(
 
-            const tbody =
-                document
-                    .getElementById(
-                        "leaderboard-body"
-                    );
+            "value",
 
+            snapshot => {
 
-            tbody.innerHTML = `
+                if (
+                    !snapshot.exists()
+                ) {
 
-                <tr>
+                    tbody.innerHTML = `
 
-                    <td
-                        colspan="5"
-                        class="error-message"
-                    >
+                        <tr>
 
-                        ❌
-                        ${escapeHTML(
-                            message
-                        )}
+                            <td
+                                colspan="6"
+                            >
 
-                    </td>
+                                ยังไม่มีนักเรียน
+                                เริ่มเล่นในคาบนี้
 
-                </tr>
+                            </td>
 
-            `;
-        }
+                        </tr>
 
+                    `;
 
-        /* ==========================================
-           โหลด Leaderboard
-        ========================================== */
-
-        function startLeaderboard() {
-
-            const tbody =
-                document
-                    .getElementById(
-                        "leaderboard-body"
-                    );
+                    return;
+                }
 
 
-            if (
-                typeof db ===
-                "undefined"
-            ) {
+                const players =
+                    [];
 
-                showBoardError(
-                    "ไม่พบการเชื่อมต่อฐานข้อมูล กรุณาตรวจสอบ firebase-config.js"
+
+                snapshot.forEach(
+                    child => {
+
+                        const data =
+                            child.val() ||
+                            {};
+
+
+                        players.push({
+
+                            shopName:
+                                data.shopName ||
+                                "ไม่ระบุชื่อ",
+
+                            stars:
+                                Number(
+                                    data.stars
+                                ) || 0,
+
+                            gold:
+                                Number(
+                                    data.gold
+                                ) || 0,
+
+                            accuracy:
+                                Number(
+                                    data.accuracy
+                                ) || 0,
+
+                            totalAttempts:
+                                Number(
+                                    data.totalAttempts
+                                ) || 0,
+
+                            correctAttempts:
+                                Number(
+                                    data.correctAttempts
+                                ) || 0
+                        });
+                    }
                 );
 
-                return;
-            }
 
+                // ดาวมากก่อน
+                // ถ้าดาวเท่ากัน Accuracy มากก่อน
+                // ถ้ายังเท่ากัน เงินมากก่อน
 
-            db
-                .ref(
-                    "leaderboard"
-                )
-                .on(
-
-                    "value",
-
-                    function(
-                        snapshot
-                    ) {
-
-                        /*
-                        ไม่มีผู้เล่น
-                        */
+                players.sort(
+                    (
+                        a,
+                        b
+                    ) => {
 
                         if (
-                            !snapshot.exists()
+                            b.stars !==
+                            a.stars
                         ) {
 
-                            tbody.innerHTML = `
-
-                                <tr>
-
-                                    <td
-                                        colspan="5"
-                                    >
-
-                                        ยังไม่มีนักเรียน
-                                        เปิดร้านซ่อมคอม
-                                        ในคาบนี้...
-
-                                    </td>
-
-                                </tr>
-
-                            `;
-
-                            return;
+                            return (
+                                b.stars -
+                                a.stars
+                            );
                         }
 
 
-                        /*
-                        แปลง Firebase
-                        Object เป็น Array
-                        */
+                        if (
+                            b.accuracy !==
+                            a.accuracy
+                        ) {
 
-                        const players =
-                            [];
-
-
-                        snapshot
-                            .forEach(
-
-                                function(
-                                    childSnapshot
-                                ) {
-
-                                    const data =
-                                        childSnapshot
-                                            .val()
-                                        || {};
-
-
-                                    players.push({
-
-                                        uid:
-                                            childSnapshot.key,
-
-                                        shopName:
-                                            data.shopName
-                                            ||
-                                            "ไม่ระบุชื่อ",
-
-                                        stars:
-                                            Number(
-                                                data.stars
-                                            ) || 0,
-
-                                        gold:
-                                            Number(
-                                                data.gold
-                                            ) || 0
-
-                                    });
-
-                                }
-
+                            return (
+                                b.accuracy -
+                                a.accuracy
                             );
+                        }
 
 
-                        /*
-                        เรียงอันดับ
-
-                        1. ดาวมากกว่า
-                        2. ถ้าดาวเท่ากัน
-                           เงินมากกว่า
-                        */
-
-                        players.sort(
-
-                            function(
-                                a,
-                                b
-                            ) {
-
-                                if (
-                                    b.stars
-                                    !==
-                                    a.stars
-                                ) {
-
-                                    return (
-                                        b.stars
-                                        -
-                                        a.stars
-                                    );
-                                }
-
-
-                                return (
-                                    b.gold
-                                    -
-                                    a.gold
-                                );
-                            }
-
-                        );
-
-
-                        tbody.innerHTML =
-                            "";
-
-
-                        /*
-                        สร้างแถว
-                        */
-
-                        players.forEach(
-
-                            function(
-                                player,
-                                index
-                            ) {
-
-                                let position =
-                                    index + 1;
-
-
-                                if (
-                                    index === 0
-                                ) {
-
-                                    position =
-                                        "🥇 1";
-                                }
-
-                                else if (
-                                    index === 1
-                                ) {
-
-                                    position =
-                                        "🥈 2";
-                                }
-
-                                else if (
-                                    index === 2
-                                ) {
-
-                                    position =
-                                        "🥉 3";
-                                }
-
-
-                                const tr =
-                                    document
-                                        .createElement(
-                                            "tr"
-                                        );
-
-
-                                tr.innerHTML = `
-
-                                    <td>
-
-                                        <b>
-                                            ${position}
-                                        </b>
-
-                                    </td>
-
-
-                                    <td>
-
-                                        <b>
-
-                                            ${escapeHTML(
-                                                player.shopName
-                                            )}
-
-                                        </b>
-
-                                    </td>
-
-
-                                    <td>
-
-                                        ${getRankDisplay(
-                                            player.stars
-                                        )}
-
-                                    </td>
-
-
-                                    <td
-                                        style="
-                                            color:#f59e0b;
-                                        "
-                                    >
-
-                                        <b>
-
-                                            ${player.stars}
-                                            ⭐
-
-                                        </b>
-
-                                    </td>
-
-
-                                    <td
-                                        style="
-                                            color:#10b981;
-                                        "
-                                    >
-
-                                        <b>
-
-                                            $${player.gold}
-
-                                        </b>
-
-                                    </td>
-
-                                `;
-
-
-                                tbody.appendChild(
-                                    tr
-                                );
-                            }
-
-                        );
-
-                    },
-
-
-                    /*
-                    Firebase Error
-                    */
-
-                    function(
-                        error
-                    ) {
-
-                        console.error(
-                            "Leaderboard Firebase Error:",
-                            error
-                        );
-
-
-                        showBoardError(
-
-                            "โหลดข้อมูลไม่ได้: "
-                            +
-                            error.message
-
+                        return (
+                            b.gold -
+                            a.gold
                         );
                     }
-
-                );
-        }
-
-
-        /* ==========================================
-           รอ Firebase Authentication
-           ก่อนโหลด Leaderboard
-        ========================================== */
-
-        async function bootLeaderboard() {
-
-            try {
-
-                if (
-                    typeof ensureAnonymousAuth
-                    !==
-                    "function"
-                ) {
-
-                    throw new Error(
-                        "ไม่พบ ensureAnonymousAuth() ใน firebase-config.js"
-                    );
-                }
-
-
-                await
-                    ensureAnonymousAuth();
-
-
-                console.log(
-                    "Leaderboard authenticated"
                 );
 
 
-                startLeaderboard();
+                tbody.innerHTML =
+                    "";
 
-            }
 
-            catch (
-                error
-            ) {
+                players.forEach(
+                    (
+                        player,
+                        index
+                    ) => {
+
+                        let position =
+                            index + 1;
+
+
+                        if (
+                            index ===
+                            0
+                        ) {
+
+                            position =
+                                "🥇 1";
+
+                        } else if (
+                            index ===
+                            1
+                        ) {
+
+                            position =
+                                "🥈 2";
+
+                        } else if (
+                            index ===
+                            2
+                        ) {
+
+                            position =
+                                "🥉 3";
+                        }
+
+
+                        const row =
+                            document
+                                .createElement(
+                                    "tr"
+                                );
+
+
+                        row.innerHTML = `
+
+                            <td>
+                                <b>
+                                    ${position}
+                                </b>
+                            </td>
+
+                            <td>
+                                <b>
+                                    ${escapeHTML(
+                                        player.shopName
+                                    )}
+                                </b>
+                            </td>
+
+                            <td>
+                                ${getRankDisplay(
+                                    player.stars
+                                )}
+                            </td>
+
+                            <td
+                                style="
+                                    color:#f59e0b;
+                                "
+                            >
+                                <b>
+                                    ${player.stars}
+                                    ⭐
+                                </b>
+                            </td>
+
+                            <td>
+
+                                ${getAccuracyHTML(
+                                    player.accuracy,
+                                    player.totalAttempts
+                                )}
+
+                                <div
+                                    style="
+                                        margin-top:3px;
+                                        color:#64748b;
+                                        font-size:10px;
+                                    "
+                                >
+
+                                    ${player.correctAttempts}
+                                    /
+                                    ${player.totalAttempts}
+
+                                </div>
+
+                            </td>
+
+                            <td
+                                style="
+                                    color:#10b981;
+                                "
+                            >
+
+                                <b>
+                                    $${player.gold}
+                                </b>
+
+                            </td>
+
+                        `;
+
+
+                        tbody.appendChild(
+                            row
+                        );
+                    }
+                );
+            },
+
+
+            error => {
 
                 console.error(
-                    "Leaderboard auth error:",
                     error
                 );
 
 
                 showBoardError(
-
-                    "เชื่อมต่อระบบผู้ใช้ไม่ได้: "
-                    +
+                    "โหลดข้อมูลไม่ได้: " +
                     error.message
-
                 );
             }
-        }
+        );
+}
 
 
-        /* ==========================================
-           เปิด Admin Modal
-        ========================================== */
+// ===============================
+// Boot
+// ===============================
 
-        function openAdminModal() {
+async function bootLeaderboard() {
 
-            document
-                .getElementById(
-                    "admin-modal"
-                )
-                .classList
-                .remove(
-                    "hidden"
-                );
+    try {
 
+        await
+            ensureAnonymousAuth();
 
-            document
-                .getElementById(
-                    "admin-email"
-                )
-                .value =
-                "";
 
+        startLeaderboard();
 
-            document
-                .getElementById(
-                    "admin-password"
-                )
-                .value =
-                "";
+    } catch (
+        error
+    ) {
 
+        showBoardError(
+            "Authentication Error: " +
+            error.message
+        );
+    }
+}
 
-            setTimeout(
 
-                function() {
+// ===============================
+// Admin
+// ===============================
 
-                    document
-                        .getElementById(
-                            "admin-email"
-                        )
-                        .focus();
+function openAdminModal() {
 
-                },
+    document
+        .getElementById(
+            "admin-modal"
+        )
+        .classList
+        .remove(
+            "hidden"
+        );
+}
 
-                100
 
-            );
-        }
+function closeAdminModal() {
 
+    document
+        .getElementById(
+            "admin-modal"
+        )
+        .classList
+        .add(
+            "hidden"
+        );
+}
 
-        /* ==========================================
-           ปิด Admin Modal
-        ========================================== */
 
-        function closeAdminModal() {
+async function confirmClearBoard() {
 
-            document
-                .getElementById(
-                    "admin-modal"
-                )
-                .classList
-                .add(
-                    "hidden"
-                );
-        }
+    const email =
+        document
+            .getElementById(
+                "admin-email"
+            )
+            .value
+            .trim();
 
 
-        /* ==========================================
-           ล้าง Leaderboard
-        ========================================== */
-
-        async function confirmClearBoard() {
-
-            const adminEmail =
-                document
-                    .getElementById(
-                        "admin-email"
-                    )
-                    .value
-                    .trim();
-
-
-            const adminPassword =
-                document
-                    .getElementById(
-                        "admin-password"
-                    )
-                    .value;
-
-
-            if (
-                !adminEmail
-                ||
-                !adminPassword
-            ) {
-
-                alert(
-                    "⚠️ กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน!"
-                );
-
-                return;
-            }
-
-
-            closeAdminModal();
-
-
-            try {
-
-                /*
-                Login ผู้สอน
-                */
-
-                await auth
-                    .signInWithEmailAndPassword(
-
-                        adminEmail,
-                        adminPassword
-
-                    );
-
-
-                /*
-                ล้าง Leaderboard
-                */
-
-                await db
-                    .ref(
-                        "leaderboard"
-                    )
-                    .remove();
-
-
-                alert(
-                    "✅ ล้างข้อมูลกระดานเรียบร้อย พร้อมเริ่มคาบเรียนใหม่!"
-                );
-
-
-                /*
-                Logout Admin
-                */
-
-                await
-                    auth.signOut();
-
-
-                /*
-                กลับเข้า Anonymous
-                */
-
-                await
-                    ensureAnonymousAuth();
-
-            }
-
-            catch (
-                error
-            ) {
-
-                console.error(
-                    "Clear leaderboard error:",
-                    error
-                );
-
-
-                alert(
-
-                    "❌ ไม่สามารถล้างกระดานได้\n\n"
-                    +
-                    error.message
-
-                );
-
-
-                try {
-
-                    await
-                        auth.signOut();
-
-                }
-
-                catch (
-                    signOutError
-                ) {
-
-                    console.error(
-                        signOutError
-                    );
-                }
-
-
-                try {
-
-                    await
-                        ensureAnonymousAuth();
-
-                }
-
-                catch (
-                    authError
-                ) {
-
-                    console.error(
-                        authError
-                    );
-                }
-            }
-        }
-
-
-        /* ==========================================
-           Enter = ล้างกระดาน
-        ========================================== */
-
+    const password =
         document
             .getElementById(
                 "admin-password"
             )
-            .addEventListener(
+            .value;
 
-                "keydown",
 
-                function(
-                    event
-                ) {
+    if (
+        !email ||
+        !password
+    ) {
 
-                    if (
-                        event.key ===
-                        "Enter"
-                    ) {
+        alert(
+            "กรุณากรอกอีเมลและรหัสผ่าน"
+        );
 
-                        confirmClearBoard();
-                    }
-                }
+        return;
+    }
 
+
+    closeAdminModal();
+
+
+    try {
+
+        await auth
+            .signInWithEmailAndPassword(
+                email,
+                password
             );
 
 
-        /* ==========================================
-           START
-        ========================================== */
+        await db
+            .ref(
+                "leaderboard"
+            )
+            .remove();
 
-        bootLeaderboard();
 
-    </script>
+        alert(
+            "✅ ล้างกระดานเรียบร้อย"
+        );
+
+
+        await
+            auth.signOut();
+
+
+        await
+            ensureAnonymousAuth();
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "❌ ล้างกระดานไม่สำเร็จ\n\n" +
+            error.message
+        );
+
+
+        try {
+
+            await
+                auth.signOut();
+
+        } catch (
+            e
+        ) {}
+
+
+        try {
+
+            await
+                ensureAnonymousAuth();
+
+        } catch (
+            e
+        ) {}
+    }
+}
+
+
+document
+    .getElementById(
+        "admin-password"
+    )
+    .addEventListener(
+
+        "keydown",
+
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                confirmClearBoard();
+            }
+        }
+    );
+
+
+bootLeaderboard();
+
+
+</script>
+
 
 </body>
+
 </html>
