@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Leaderboard - PC Detective</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Noto Sans Thai', sans-serif; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        h1 { color: #3b82f6; font-size: 2.5em; margin-bottom: 5px; }
+        .btn-clear { background-color: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; position: absolute; top: 20px; right: 20px; }
+        .btn-clear:hover { background-color: #dc2626; }
+        table { width: 100%; max-width: 1000px; margin: 0 auto; border-collapse: collapse; background-color: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        th, td { padding: 15px; text-align: center; border-bottom: 1px solid #334155; font-size: 18px; }
+        th { background-color: #3b82f6; color: white; font-size: 20px; }
+        tr:nth-child(even) { background-color: #0f172a; }
+        .rank-icon { font-size: 24px; margin-right: 5px; }
+        .hidden { display: none !important; }
+
+        /* สไตล์ของหน้าต่าง Login ซ่อนรหัสผ่าน */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
+        .modal-card { background: #1e293b; padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border-top: 4px solid #ef4444; }
+        .modal-title { color: #ef4444; margin-bottom: 10px; font-size: 20px; font-weight: bold; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: #94a3b8; font-size: 14px; }
+        .input-group input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #f8fafc; font-size: 16px; outline: none; box-sizing: border-box; }
+        .input-group input:focus { border-color: #3b82f6; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background-color: #64748b; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; font-size: 16px; }
+        .btn-confirm { background-color: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; font-size: 16px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <button class="btn-clear" onclick="openAdminModal()">🗑️ ล้างคะแนนเริ่มคาบใหม่</button>
+
+    <div class="header">
+        <h1>🏆 LIVE LEADERBOARD</h1>
+        <p>ตารางอันดับช่างซ่อมคอมพิวเตอร์ประจำคาบเรียน (Real-time)</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>อันดับ</th>
+                <th>ชื่อร้านค้า / นักเรียน</th>
+                <th>Rank ปัจจุบัน</th>
+                <th>จำนวนดาว (⭐)</th>
+                <th>เงินสะสม (💰)</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+            <tr><td colspan="5">⏳ กำลังดึงข้อมูลจากห้องเรียน...</td></tr>
+        </tbody>
+    </table>
+
+    <!-- หน้าต่าง Login ของคุณครู -->
+    <div id="admin-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-title">🔒 ยืนยันตัวตนผู้สอน</div>
+            <div style="margin-bottom: 20px; color: #cbd5e1; font-size: 14px;">กรุณาเข้าสู่ระบบเพื่อล้างกระดานคะแนน</div>
+            
+            <div class="input-group">
+                <label>📧 อีเมล:</label>
+                <input type="email" id="admin-email" placeholder="admin@poly.ac.th">
+            </div>
+            
+            <div class="input-group">
+                <label>🔑 รหัสผ่าน:</label>
+                <!-- ปรับเป็น type="password" เพื่อซ่อนตัวอักษรเป็นจุดไข่ปลา -->
+                <input type="password" id="admin-password" placeholder="••••••••">
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeAdminModal()">ยกเลิก</button>
+                <button class="btn-confirm" onclick="confirmClearBoard()">ล้างกระดาน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script> <!-- ดึง Config ตัวเดียวกับที่เกมใช้มาเลย -->
+
+    <script>
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        function getRankDisplay(stars) {
+            if(stars >= 20) return `<span class="rank-icon">👑</span> Conqueror`;
+            if(stars >= 16) return `<span class="rank-icon">💎</span> Diamond`;
+            if(stars >= 12) return `<span class="rank-icon">🔮</span> Platinum`;
+            if(stars >= 8)  return `<span class="rank-icon">🥇</span> Gold`;
+            if(stars >= 4)  return `<span class="rank-icon">🥈</span> Silver`;
+            return `<span class="rank-icon">🥉</span> Bronze`;
+        }
+
+        db.ref('leaderboard').on('value', (snapshot) => {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = ''; 
+
+            if (!snapshot.exists()) {
+                tbody.innerHTML = '<tr><td colspan="5">ยังไม่มีนักเรียนเปิดร้านซ่อมคอมในคาบนี้...</td></tr>';
+                return;
+            }
+
+            let players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
+
+            players.sort((a, b) => {
+                if (b.stars === a.stars) return b.gold - a.gold;
+                return b.stars - a.stars;
+            });
+
+            players.forEach((player, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${index + 1}</b></td>
+                    <td><b>${player.shopName || 'ไม่ระบุชื่อ'}</b></td>
+                    <td>${getRankDisplay(player.stars || 0)}</td>
+                    <td style="color: #f59e0b;"><b>${player.stars || 0} ⭐</b></td>
+                    <td style="color: #10b981;"><b>$${player.gold || 0}</b></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+
+        // ==========================================
+        // ระบบป๊อปอัปยืนยันตัวตนสำหรับล้างกระดาน
+        // ==========================================
+        function openAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            // เคลียร์ช่องให้ว่างทุกครั้งที่เปิด
+            document.getElementById('admin-email').value = '';
+            document.getElementById('admin-password').value = '';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function confirmClearBoard() {
+            const adminEmail = document.getElementById('admin-email').value.trim();
+            const adminPassword = document.getElementById('admin-password').value.trim();
+
+            if (!adminEmail || !adminPassword) {
+                alert("⚠️ กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน!");
+                return;
+            }
+
+            // ปิดหน้าต่าง Modal ระหว่างรอเซิร์ฟเวอร์ประมวลผล
+            closeAdminModal();
+
+            // ส่งข้อมูลไปตรวจกับ Firebase 
+            auth.signInWithEmailAndPassword(adminEmail, adminPassword)
+                .then((userCredential) => {
+                    return db.ref('leaderboard').remove(); // ถ้าถูกให้ลบกระดาน
+                })
+                .then(() => {
+                    alert("✅ ล้างข้อมูลกระดานเรียบร้อย พร้อมเริ่มคาบเรียนใหม่!");
+                    return auth.signOut(); // บังคับเตะแอดมินออกจากระบบทันทีเพื่อความปลอดภัย
+                })
+                .catch((error) => {
+                    alert("❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือคุณไม่มีสิทธิ์ลบข้อมูลครับ!");
+                    console.error(error);
+                    auth.signOut();
+                });
+        }
+    </script>
+</body>
+</html>

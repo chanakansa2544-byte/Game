@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PC Detective Pro: Ultimate Diagnostic</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0e10;--surface:#12171a;--surface-2:#171d21;--surface-3:#0f1315;
+  --line:#293137;--line-soft:#20272c;--text:#eef2f3;--muted:#8a959c;
+  --accent:#e3b646;--accent-soft:#2b2412;--success:#4fc487;--danger:#df6b61;--info:#66a8d2;
+  --max:1500px;--radius:14px;--shadow:0 12px 34px rgba(0,0,0,.24);
+}
+*{box-sizing:border-box}
+html{background:var(--bg);color-scheme:dark}
+body{margin:0;min-width:280px;min-height:100dvh;background:var(--bg);color:var(--text);font-family:'Noto Sans Thai',sans-serif}
+button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hidden{display:none!important}
+
+/* ---------- LOGIN ---------- */
+.login-screen{min-height:100dvh;display:grid;place-items:center;padding:clamp(16px,4vw,48px);background:radial-gradient(circle at 18% 18%,rgba(227,182,70,.08),transparent 32%),linear-gradient(145deg,#090c0e,#101518 55%,#090c0e)}
+.login-shell{width:min(920px,100%);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);overflow:hidden;border:1px solid var(--line);border-radius:22px;background:var(--surface);box-shadow:var(--shadow)}
+.login-copy{padding:clamp(30px,6vw,58px)}
+.eyebrow{font:700 11px 'Space Grotesk';letter-spacing:1.8px;color:var(--accent)}
+.login-copy h1{font:800 clamp(36px,6vw,58px)/1.02 'Space Grotesk';margin:16px 0;color:#f2f4f4;letter-spacing:-1.5px}
+.login-copy p{max-width:520px;margin:0;color:var(--muted);font-size:14px;line-height:1.85}
+.bay-mark{display:flex;align-items:center;gap:9px;margin-top:34px;color:#aab3b8;font-size:12px}.bay-light{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 13px rgba(79,196,135,.5)}
+.login-form{display:flex;flex-direction:column;justify-content:center;padding:clamp(28px,5vw,48px);background:#0d1113;border-left:1px solid var(--line)}
+.form-label{font-size:13px;font-weight:700;margin-bottom:9px}.login-form input{width:100%;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#171c20;color:var(--text);text-align:left;outline:none}.login-form input::placeholder{color:#606b72}.login-form input:focus{border-color:#8c7335;box-shadow:0 0 0 3px rgba(227,182,70,.08)}
+.btn-main{width:100%;min-height:48px;margin-top:12px;border:0;border-radius:10px;background:var(--accent);color:#16120a;font-weight:800}.btn-main:hover{background:#efc762}.login-note{margin-top:15px;color:#68737a;font-size:11px;line-height:1.7}
+
+/* ---------- APP SHELL ---------- */
+.app{min-height:100dvh;display:grid;grid-template-columns:216px minmax(0,1fr)}
+.sidebar{position:sticky;top:0;height:100dvh;border-right:1px solid var(--line);background:#0d1012;padding:20px 13px;display:flex;flex-direction:column;z-index:10}
+.brand{padding:5px 9px 20px;border-bottom:1px solid var(--line)}.brand-name{font:800 16px/1.1 'Space Grotesk'}.brand-sub{font-size:10px;color:#657077;margin-top:5px;letter-spacing:.4px}
+.side-section{margin-top:22px}.side-title{margin:0 9px 8px;color:#5f6a71;font-size:10px;font-weight:800;letter-spacing:1.3px}.side-item{display:flex;align-items:center;gap:10px;padding:10px 9px;margin:2px 0;border:1px solid transparent;border-radius:9px;color:#8b969c;font-size:12px}.side-item.active{background:#191f23;border-color:#2a3237;color:#f0f3f4}.side-item:hover{background:#151a1e;color:#dce2e5}.side-icon{width:20px;text-align:center}.side-footer{margin-top:auto;border-top:1px solid var(--line);padding:13px 9px 2px;color:#606a70;font-size:10px;line-height:1.7}
+
+.main{width:100%;max-width:var(--max);min-width:0;margin:0 auto;padding:18px clamp(14px,2.4vw,30px) 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:42px;margin-bottom:16px}.location{display:flex;align-items:center;gap:8px;min-width:0;color:var(--muted);font-size:12px}.location strong{color:#dfe4e6}.live{width:7px;height:7px;flex:0 0 auto;border-radius:50%;background:var(--success);box-shadow:0 0 10px rgba(79,196,135,.45)}
+.resources{display:grid;grid-template-columns:repeat(3,minmax(80px,1fr));gap:7px;min-width:min(390px,45%)}.resource{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#12171a;color:#aeb7bc;font:600 10px 'Space Grotesk'}.resource b{color:#f2f4f4;font-size:12px}.resource.energy b{color:var(--accent)}.resource.shield b{color:#a9cce7}
+
+/* ---------- RESPONSIVE GAME GRID ---------- */
+.game-grid{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:16px;align-items:start}
+.case-panel{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
+.case-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:start;padding:22px clamp(16px,2.3vw,25px);border-bottom:1px solid var(--line)}
+.case-kicker{color:var(--accent);font:800 10px 'Space Grotesk';letter-spacing:1.2px}.case-title{max-width:900px;margin:8px 0 0;font-size:clamp(20px,2.25vw,28px);line-height:1.4;letter-spacing:-.3px}.case-sub{margin-top:7px;color:var(--muted);font-size:11px;line-height:1.5}.case-badge{white-space:nowrap;padding:7px 10px;border:1px solid #5b4b29;border-radius:999px;background:#211c11;color:#e5c26a;font-size:10px;font-weight:800}
+.progress{height:4px;background:#20262a}.progress span{display:block;width:16.66%;height:100%;background:var(--accent);transition:width .25s ease}
+.workbench{padding:clamp(14px,2vw,22px)}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 10px}.section-head h3{margin:0;font-size:14px}.section-head span{color:#68737a;font-size:10px;text-align:right}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.tool{width:100%;min-width:0;min-height:92px;padding:12px;text-align:left;border:1px solid var(--line);border-radius:11px;background:#111619;color:var(--text);transition:.16s}.tool:hover{border-color:#515b62;background:#171d21;transform:translateY(-1px)}.tool:active{transform:translateY(0)}.tool-icon{display:block;margin-bottom:9px;font-size:18px}.tool-name{font-size:12px;font-weight:800}.tool-cost{margin-top:4px;color:#707b82;font-size:9px;line-height:1.5}.tool-cost b{color:var(--accent)}
+.evidence{margin-top:16px;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:#0c1012}.evidence-head{display:flex;align-items:center;min-height:37px;padding:0 12px;border-bottom:1px solid var(--line);color:#737e85;font-size:10px}.evidence-dot{width:7px;height:7px;margin-right:8px;border-radius:50%;background:#4e5a61}.clue{min-height:56px;padding:14px 15px;color:#aab4b9;font-size:12px;line-height:1.7}.clue.active{color:#b6d9ec}
+.cmd-container{margin-top:10px;overflow:hidden;border:1px solid #222a2f;border-radius:9px;background:#080a0b;box-shadow:none}.cmd-header{display:flex;align-items:center;min-height:32px;padding:0 10px;border-bottom:1px solid #20262a;background:#111619}.cmd-dots{display:flex;gap:5px}.cmd-dot{width:7px;height:7px;border-radius:50%}.dot-r{background:#d85f58}.dot-y{background:#c89a38}.dot-g{background:#4caf7d}.cmd-title{margin-left:10px;color:#68737a;font:9px Consolas,monospace;letter-spacing:.4px}.cmd-box{height:112px;overflow:auto;padding:10px 12px;color:#727d83;font:10px/1.65 Consolas,'Courier New',monospace;text-align:left;scrollbar-width:thin}.cmd-line{margin-bottom:2px;overflow-wrap:anywhere}.cmd-error{color:#e56b63}.cmd-success{color:#55c889}.cmd-warn{color:#d8ad42}
+.actions{margin-top:18px}.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.answer-btn{width:100%;min-height:66px;padding:12px 14px;text-align:left;border:1px solid var(--line);border-radius:10px;background:#171c20;color:#dce1e4;font-size:12px;line-height:1.55;transition:.16s}.answer-btn:hover:not(:disabled){border-color:#59636a;background:#1c2226}.answer-btn:disabled{cursor:default}.btn-success{background:#153225!important;border-color:#32795b!important;color:#b8ebd0!important}.btn-danger{background:#351c1a!important;border-color:#874039!important;color:#ffc5be!important}.shop-button{width:100%;min-height:43px;margin-top:11px;border:1px solid #65532d;border-radius:9px;background:#201b11;color:#e5c36c;font-size:12px;font-weight:800}.shop-button:hover{background:#292315}
+
+/* ---------- RIGHT RAIL ---------- */
+.rail{display:grid;gap:11px;min-width:0}.rail-card{min-width:0;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}.profile{display:flex;align-items:center;gap:10px}.avatar{display:grid;place-items:center;width:40px;height:40px;flex:0 0 auto;border:1px solid #574928;border-radius:10px;background:#292318;font-size:18px}.profile small{display:block;color:#6f7a80;font-size:9px}.profile strong{display:block;max-width:190px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.rank{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}.rank-label{color:#737d84;font-size:9px}.rank-value{margin-top:2px;color:#e6c16a;font:700 18px 'Space Grotesk'}.rank-stars{color:#d7b250;font-size:11px}.shift-title{margin-bottom:10px;font-size:11px;font-weight:800}.shift-line{height:7px;overflow:hidden;border-radius:99px;background:#252b2f}.shift-line span{display:block;width:16.66%;height:100%;border-radius:99px;background:var(--accent);transition:width .25s}.shift-caption{display:flex;justify-content:space-between;gap:8px;margin-top:7px;color:#6e787f;font-size:9px}.hint{margin:0;color:#7f898f;font-size:10px;line-height:1.75}
+
+/* ---------- MODALS ---------- */
+.modal-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:rgba(3,5,6,.78);backdrop-filter:blur(6px);overscroll-behavior:contain}.modal-card{width:min(430px,100%);padding:22px;border:1px solid #343c42;border-radius:15px;background:#171c20;box-shadow:var(--shadow)}.modal-title{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:10px;font-size:17px;font-weight:800}.modal-message{margin-bottom:18px;color:#bbc4c9;font-size:12px;line-height:1.8;text-align:center}.modal-card .btn{width:100%;min-height:43px;border:0;border-radius:9px;background:var(--accent);color:#16120a;font-weight:800}.shop-wrap{width:min(560px,100%);max-height:min(700px,90dvh);overflow:auto;padding:19px;border:1px solid #30383e;border-radius:15px;background:#12171a}.shop-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.shop-top h2{margin:0;font-size:17px}.shop-balance{color:#7f8990;font-size:10px}.shop-card{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px;margin:8px 0;border:1px solid var(--line);border-radius:10px;background:#171c20}.shop-card strong{font-size:12px}.shop-card small{color:var(--muted);font-size:10px}.buy{width:72px;min-height:38px;border:1px solid #476e5a;border-radius:8px;background:#17261e;color:#9de0b8;font-weight:800}.close-shop{width:100%;min-height:40px;margin-top:10px;border:1px solid #4b3533;border-radius:8px;background:#211716;color:#dfaaa4;font-weight:700}
+
+.animate-pop{animation:pop .3s ease}@keyframes pop{0%{opacity:.5;transform:translateY(4px)}100%{opacity:1;transform:none}}
+
+/* ---------- LARGE TABLET / SMALL LAPTOP ---------- */
+@media (max-width:1180px){
+  .app{grid-template-columns:72px minmax(0,1fr)}
+  .sidebar{padding:18px 8px}.brand{padding:5px 4px 18px;text-align:center}.brand-name{font-size:12px}.brand-sub,.side-title,.side-item span:not(.side-icon),.side-footer{display:none}.side-item{justify-content:center;padding:11px 6px}.side-icon{font-size:16px}
+  .game-grid{grid-template-columns:minmax(0,1fr) 245px;gap:12px}.tools{grid-template-columns:repeat(2,minmax(0,1fr))}.tool{min-height:86px}
+}
+
+/* ---------- TABLET / NOTEBOOK PORTRAIT ---------- */
+@media (max-width:900px){
+  .main{padding:14px 16px 24px}.topbar{align-items:flex-start}.resources{min-width:0;width:min(390px,50%)}
+  .game-grid{grid-template-columns:1fr}.rail{grid-template-columns:repeat(3,minmax(0,1fr))}.rail-card:first-child{grid-column:span 1}.case-head{grid-template-columns:minmax(0,1fr) auto}
+  .rail-card{padding:14px}.profile strong{max-width:150px}
+}
+
+/* ---------- PHONE / SMALL TABLET ---------- */
+@media (max-width:640px){
+  .login-shell{grid-template-columns:1fr;border-radius:17px}.login-form{border-left:0;border-top:1px solid var(--line)}
+  .app{display:block}.sidebar{display:none}.main{padding:10px 10px calc(20px + env(safe-area-inset-bottom))}
+  .topbar{display:block;margin-bottom:10px}.location{padding:3px 2px 9px}.resources{width:100%;grid-template-columns:repeat(3,1fr)}.resource{min-height:38px;padding:7px 5px;font-size:9px}.resource b{font-size:11px}
+  .case-panel{border-radius:12px}.case-head{display:block;padding:16px}.case-title{font-size:20px}.case-badge{display:inline-block;margin-top:10px}.workbench{padding:12px}.section-head{align-items:flex-start}.section-head h3{font-size:13px}.section-head span{font-size:9px}
+  .tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.tool{min-height:88px;padding:11px}.tool-name{font-size:11px}.tool-cost{font-size:8px}
+  .cmd-box{height:105px;padding:9px;font-size:9px}.answers{grid-template-columns:1fr;gap:7px}.answer-btn{min-height:58px;padding:11px 12px;font-size:11px}.shop-button{min-height:44px}
+  .rail{grid-template-columns:1fr 1fr;gap:8px}.rail-card:first-child{grid-column:1/-1}.rail-card{padding:13px}.profile strong{max-width:190px}
+}
+
+/* ---------- VERY SMALL PHONES ---------- */
+@media (max-width:390px){
+  .main{padding-left:8px;padding-right:8px}.resources{gap:5px}.resource{font-size:8px}.resource b{font-size:10px}.case-head{padding:14px}.case-title{font-size:18px}.workbench{padding:10px}.tools{gap:6px}.tool{min-height:82px;padding:9px}.tool-icon{margin-bottom:6px;font-size:16px}.tool-name{font-size:10px}.tool-cost{font-size:8px}.section-head span{display:none}.rail{grid-template-columns:1fr}.rail-card:first-child{grid-column:auto}.login-copy h1{font-size:35px}
+}
+
+/* ---------- LANDSCAPE PHONES ---------- */
+@media (max-width:900px) and (orientation:landscape) and (max-height:560px){
+  .main{padding-top:8px}.topbar{display:flex;align-items:center}.location{padding:0}.resources{width:auto;min-width:330px}.case-head{padding:13px 16px}.cmd-box{height:82px}.tool{min-height:74px}.workbench{padding:12px}.rail{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ---------- TOUCH / ACCESSIBILITY ---------- */
+@media (hover:none){.tool:hover,.answer-btn:hover:not(:disabled),.side-item:hover{transform:none;background:initial;border-color:var(--line)}.tool,.answer-btn,.shop-button,.btn-main,.buy,.close-shop{touch-action:manipulation}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-shell">
+    <section class="login-copy">
+      <div class="eyebrow">SERVICE BAY / DIAGNOSTIC SIMULATION</div>
+      <h1>PC Detective<br>Pro</h1>
+      <p>The Diagnostic Simulation System — รับเคสจากลูกค้า ตรวจอาการด้วยเครื่องมือ แล้วตัดสินใจซ่อมให้ถูกก่อนที่พลังงานของร้านจะหมด</p>
+      <div class="bay-mark"><span class="bay-light"></span> Diagnostic station online · Shift system ready</div>
+    </section>
+    <section class="login-form">
+      <label class="form-label" for="shop-name-input">ชื่อร้าน / รหัสช่าง</label>
+      <input type="text" id="shop-name-input" placeholder="เช่น Chanakan Computer" maxlength="25" autocomplete="off">
+      <button class="btn-main" onclick="startGame()">เริ่มกะงาน →</button>
+      <div class="login-note">แต่ละกะมี 6 เคส · ใช้เครื่องมือเพื่อหาหลักฐาน · ตัดสินใจผิดมีผลต่อพลังงานและอันดับ</div>
+    </section>
+  </div>
+</div>
+
+<div id="game-screen" class="hidden app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-name">PC DETECTIVE</div><div class="brand-sub">SERVICE BAY / 01</div></div>
+    <div class="side-section">
+      <div class="side-title">WORKSPACE</div>
+      <div class="side-item active"><span class="side-icon">▣</span><span>Current Case</span></div>
+      <div class="side-item"><span class="side-icon">◈</span><span>Diagnostics</span></div>
+      <div class="side-item"><span class="side-icon">▤</span><span>Shift Log</span></div>
+    </div>
+    <div class="side-section"><div class="side-title">STORE</div><div class="side-item" onclick="toggleShop()"><span class="side-icon">□</span><span>Parts & Supply</span></div></div>
+    <div class="side-footer">Training simulation<br>Build 1.0 · Diagnostic Lab</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="location"><span class="live"></span><strong>Service Bay</strong><span>/</span><span>Live shift</span></div>
+      <div class="resources">
+        <div class="resource energy">ENERGY <b><span id="display-energy">100</span>%</b></div>
+        <div class="resource">CASH <b>$<span id="display-gold">0</span></b></div>
+        <div class="resource shield">SHIELD <b><span id="display-shield">0</span></b></div>
+      </div>
+    </header>
+
+    <div class="game-grid">
+      <section class="case-panel animate-pop">
+        <div class="case-head">
+          <div>
+            <div class="case-kicker">ACTIVE CUSTOMER CASE</div>
+            <div class="case-title" id="case-symptom">กำลังโหลดสถานการณ์...</div>
+            <div class="case-sub" id="case-title">เคสที่ 1/6</div>
+          </div>
+          <div class="case-badge">DIAGNOSE → REPAIR</div>
+        </div>
+        <div class="progress"><span id="case-progress"></span></div>
+
+        <div class="workbench">
+          <div class="section-head"><h3>01 / ตรวจหลักฐาน</h3><span>เลือกเครื่องมือที่คิดว่าจะช่วยได้</span></div>
+          <div class="tools">
+            <button class="tool" onclick="useTool('beep')"><span class="tool-icon">◉</span><div class="tool-name">Beep Code</div><div class="tool-cost">ตรวจเสียง POST · <b>-10%</b></div></button>
+            <button class="tool" onclick="useTool('led')"><span class="tool-icon">◆</span><div class="tool-name">Debug LED</div><div class="tool-cost">อ่านสถานะบอร์ด · <b>-10%</b></div></button>
+            <button class="tool" onclick="useTool('task')"><span class="tool-icon">▥</span><div class="tool-name">Task Manager</div><div class="tool-cost">ดูโหลดระบบ · <b>-10%</b></div></button>
+            <button class="tool" onclick="useTool('hw')"><span class="tool-icon">◌</span><div class="tool-name">HW Monitor</div><div class="tool-cost">เช็กความร้อน/ไฟ · <b>-10%</b></div></button>
+          </div>
+
+          <div class="evidence">
+            <div class="evidence-head"><span class="evidence-dot"></span>DIAGNOSTIC REPORT / latest finding</div>
+            <div class="clue" id="clue-display">รอกดใช้เครื่องมือวิเคราะห์...</div>
+          </div>
+
+          <div class="cmd-container">
+            <div class="cmd-header"><div class="cmd-dots"><div class="cmd-dot dot-r"></div><div class="cmd-dot dot-y"></div><div class="cmd-dot dot-g"></div></div><div class="cmd-title">root@DiagOS: /system/analyze</div></div>
+            <div id="cmd-terminal" class="cmd-box"></div>
+          </div>
+
+          <div class="actions">
+            <div class="section-head"><h3>02 / เลือกแผนการซ่อม</h3><span>อ่านหลักฐานก่อนลงมือ</span></div>
+            <div id="action-buttons" class="answers"></div>
+            <button class="shop-button" onclick="toggleShop()">เปิดคลังอะไหล่ / ร้านค้า</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="rail">
+        <div class="rail-card">
+          <div class="profile"><div class="avatar">⌁</div><div><small>TECHNICIAN / SHOP</small><strong id="display-shop-name">ร้านซ่อม</strong></div></div>
+          <div class="rank"><div><div class="rank-label">CURRENT RANK</div><div class="rank-value" id="display-rank">Bronze</div></div><div class="rank-stars"><span id="display-stars">0</span> ★</div></div>
+        </div>
+        <div class="rail-card">
+          <div class="shift-title">SHIFT PROGRESS</div>
+          <div class="shift-line"><span id="shift-progress"></span></div>
+          <div class="shift-caption"><span>Cases completed</span><b id="shift-count">0 / 6</b></div>
+        </div>
+        <div class="rail-card"><div class="shift-title">FIELD NOTE</div><p class="hint">อย่ารีบซ่อมจากอาการอย่างเดียว ใช้เครื่องมือเพื่อหา “หลักฐาน” แล้วค่อยเลือกวิธีแก้ที่ตรงจุดที่สุด</p></div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<div id="shop-screen" class="modal-overlay hidden shop-modal">
+  <div class="shop-wrap">
+    <div class="shop-top"><h2>Parts & Supply</h2><div class="shop-balance">AVAILABLE <b>$<span id="shop-gold">0</span></b></div></div>
+    <div class="shop-card"><div><strong>Energy Drink</strong><br><small>ฟื้นฟูพลังงาน 30%</small></div><button class="buy" onclick="buyItem('energy',80,30)">$80</button></div>
+    <div class="shop-card"><div><strong>AI Diagnostic</strong><br><small>ตัดตัวเลือกผิด 1 ข้อ</small></div><button class="buy" onclick="buyItem('ai',200,0)">$200</button></div>
+    <div class="shop-card"><div><strong>Insurance Shield</strong><br><small>กันหักพลังงาน/ดาว 1 ครั้ง</small></div><button class="buy" onclick="buyItem('shield',300,0)">$300</button></div>
+    <button class="close-shop" onclick="toggleShop()">ปิดคลัง</button>
+  </div>
+</div>
+
+<div id="custom-alert" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-title"><span id="alert-icon">⌁</span><span id="alert-title">ผู้ประเมินระบบ</span></div>
+    <div class="modal-message" id="alert-message">ข้อความแจ้งเตือน...</div>
+    <button class="btn" onclick="closeAlert()">รับทราบ</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="firebase-config.js"></script>
+<script src="game-logic.js"></script>
+<script>
+(function(){
+  const originalRenderCase = window.renderCase;
+  if(typeof originalRenderCase === 'function'){
+    window.renderCase = function(){ originalRenderCase(); syncResponsiveProgress(); };
+  }
+  const originalUpdateUI = window.updateUI;
+  if(typeof originalUpdateUI === 'function'){
+    window.updateUI = function(){ originalUpdateUI(); syncResponsiveProgress(); };
+  }
+  function syncResponsiveProgress(){
+    const el=document.getElementById('case-title');
+    if(!el)return;
+    const m=el.innerText.match(/เคสที่\s*(\d+)\/(\d+)/);
+    if(!m)return;
+    const current=Number(m[1]), total=Number(m[2]);
+    const pct=Math.max(0,Math.min(100,((current-1)/total)*100));
+    const p=document.getElementById('case-progress'), sp=document.getElementById('shift-progress'), c=document.getElementById('shift-count');
+    if(p)p.style.width=pct+'%'; if(sp)sp.style.width=pct+'%'; if(c)c.innerText=Math.max(0,current-1)+' / '+total;
+  }
+})();
+</script>
+</body>
+</html>
