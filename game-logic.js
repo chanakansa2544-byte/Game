@@ -6,28 +6,62 @@ let shields = 0;
 
 let currentCaseNum = 1;
 const maxCases = 6;
+
 let currentCaseData = null;
 let gamePool = [];
 
-// คลังข้อความเทคนิคกรณีเช็กแล้ว "เครื่องปกติ"
+// ===============================
+// ระบบป้องกันการสุ่มกด
+// ===============================
+
+let usedTools = new Set();
+let evidenceFound = false;
+let caseAnswered = false;
+let toolCooldown = false;
+
+let totalAttempts = 0;
+let correctAttempts = 0;
+
+
+// ===============================
+// ข้อความเมื่อเครื่องมือไม่พบปัญหา
+// ===============================
+
 const normalToolMessages = {
-    'beep': "🔊 BEEP CODE: สถานะปกติ ไม่พบรหัสเสียงความผิดปกติ (POST Passed)",
-    'led': "💡 DEBUG LED: ลำดับบูตปกติ (CPU->DRAM->VGA->BOOT สถานะ PASS)",
-    'task': "📊 TASK MGR: ทรัพยากรระบบปกติ (CPU/RAM/Disk ไม่พบภาวะคอขวด)",
-    'hw': "🌡️ HW MONITOR: อุณหภูมิ < 65°C, แรงดันไฟ (12V/5V/3.3V) เสถียร"
+
+    beep:
+        "🔊 BEEP CODE: สถานะปกติ ไม่พบรหัสเสียงความผิดปกติ (POST Passed)",
+
+    led:
+        "💡 DEBUG LED: ลำดับบูตปกติ (CPU->DRAM->VGA->BOOT สถานะ PASS)",
+
+    task:
+        "📊 TASK MGR: ทรัพยากรระบบปกติ (CPU/RAM/Disk ไม่พบภาวะคอขวด)",
+
+    hw:
+        "🌡️ HW MONITOR: อุณหภูมิ < 65°C, แรงดันไฟ (12V/5V/3.3V) เสถียร"
+
 };
 
+
 // =====================================================
-// คลังข้อสอบ Mega Pool 30 สถานการณ์
+// คลังข้อสอบ 30 สถานการณ์
 // =====================================================
 
 const masterCasePool = [
 
     {
-        symptom: "เปิดเครื่องติด พัดลมหมุน แต่ไม่มีภาพขึ้นจอ",
+        symptom:
+            "เปิดเครื่องติด พัดลมหมุน แต่ไม่มีภาพขึ้นจอ",
+
         tool: "beep",
-        toolHint: "🔊 Beep Code: ดังยาว 1 สั้น 2",
-        correct: "ถอด RAM ออกมาใช้ยางลบขัดทำความสะอาดหน้าสัมผัส",
+
+        toolHint:
+            "🔊 Beep Code: ดังยาว 1 สั้น 2",
+
+        correct:
+            "ถอด RAM ออกมาใช้ยางลบขัดทำความสะอาดหน้าสัมผัส",
+
         wrong: [
             "ตรวจสอบปลั๊กไฟและเปลี่ยน Power Supply ใหม่",
             "ฟอร์แมตฮาร์ดดิสก์และลงระบบปฏิบัติการใหม่",
@@ -36,10 +70,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "ใช้งานไปได้ 15 นาที เครื่องดับเอง พัดลมเสียงดัง",
+        symptom:
+            "ใช้งานไปได้ 15 นาที เครื่องดับเอง พัดลมเสียงดัง",
+
         tool: "hw",
-        toolHint: "🌡️ HWMonitor: CPU อุณหภูมิ 98°C",
-        correct: "เช็ดซิลิโคนเก่าออกแล้วทำการทาซิลิโคน CPU ใหม่",
+
+        toolHint:
+            "🌡️ HWMonitor: CPU อุณหภูมิ 98°C",
+
+        correct:
+            "เช็ดซิลิโคนเก่าออกแล้วทำการทาซิลิโคน CPU ใหม่",
+
         wrong: [
             "ถอดการ์ดจอออกมาทำความสะอาดพัดลมระบายความร้อน",
             "ติดตั้งโปรแกรมแอนตี้ไวรัสและทำการ Full Scan",
@@ -48,10 +89,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เปิดเครื่องติด แต่ไฟ Debug LED ค้างที่คำว่า BOOT",
+        symptom:
+            "เปิดเครื่องติด แต่ไฟ Debug LED ค้างที่คำว่า BOOT",
+
         tool: "led",
-        toolHint: "💡 Debug LED: ค้างที่ BOOT",
-        correct: "เข้าไปตั้งค่าลำดับการบูต (Boot Order) ใน BIOS",
+
+        toolHint:
+            "💡 Debug LED: ค้างที่ BOOT",
+
+        correct:
+            "เข้าไปตั้งค่าลำดับการบูต (Boot Order) ใน BIOS",
+
         wrong: [
             "ตรวจสอบสาย LAN ว่าเชื่อมต่อกับเครือข่ายแน่นหรือไม่",
             "ถอด RAM ออกมาทำความสะอาดและใส่กลับเข้าไปใหม่",
@@ -60,10 +108,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เครื่องกระตุกมาก เปิดโปรแกรมช้า แฮงก์บ่อย",
+        symptom:
+            "เครื่องกระตุกมาก เปิดโปรแกรมช้า แฮงก์บ่อย",
+
         tool: "task",
-        toolHint: "📊 Task Manager: Disk ทำงาน 100%",
-        correct: "เปลี่ยนฮาร์ดดิสก์หลักจากแบบ HDD เป็นแบบ SSD",
+
+        toolHint:
+            "📊 Task Manager: Disk ทำงาน 100%",
+
+        correct:
+            "เปลี่ยนฮาร์ดดิสก์หลักจากแบบ HDD เป็นแบบ SSD",
+
         wrong: [
             "เปลี่ยนสายสัญญาณจอภาพใหม่เพื่อลดอาการกระตุก",
             "ดาวน์โหลดและอัปเดตไดรเวอร์การ์ดจอเวอร์ชันล่าสุด",
@@ -72,10 +127,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เปิดไม่ติดเลย พัดลมไม่หมุน ไฟไม่เข้าเมนบอร์ด",
+        symptom:
+            "เปิดไม่ติดเลย พัดลมไม่หมุน ไฟไม่เข้าเมนบอร์ด",
+
         tool: "hw",
-        toolHint: "🔌 เช็กสายไฟ: ปลั๊กเสียบแน่นปกติ ไม่มีไฟรั่ว",
-        correct: "ทำการเปลี่ยน Power Supply (PSU) ตัวใหม่ทดแทน",
+
+        toolHint:
+            "🔌 เช็กสายไฟ: ปลั๊กเสียบแน่นปกติ ไม่มีไฟรั่ว",
+
+        correct:
+            "ทำการเปลี่ยน Power Supply (PSU) ตัวใหม่ทดแทน",
+
         wrong: [
             "เปลี่ยนถ่าน BIOS บนเมนบอร์ดเนื่องจากแบตเตอรี่หมด",
             "ถอด RAM ออกมาทำความสะอาดเพื่อแก้ปัญหาไฟไม่เข้า",
@@ -84,10 +146,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เล่นเกมภาพแตกเป็นเส้นๆ (Artifact) แล้วค้าง",
+        symptom:
+            "เล่นเกมภาพแตกเป็นเส้นๆ (Artifact) แล้วค้าง",
+
         tool: "led",
-        toolHint: "💡 Debug LED: ค้างที่ VGA",
-        correct: "ถอดการ์ดจอออกมาตรวจสอบ หรือส่งเคลมศูนย์บริการ",
+
+        toolHint:
+            "💡 Debug LED: ค้างที่ VGA",
+
+        correct:
+            "ถอดการ์ดจอออกมาตรวจสอบ หรือส่งเคลมศูนย์บริการ",
+
         wrong: [
             "ทำการลงระบบปฏิบัติการ Windows ใหม่เพื่อล้างไวรัส",
             "อัปเกรด CPU ให้มีประสิทธิภาพสูงขึ้นเพื่อลดคอขวด",
@@ -96,10 +165,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "ต่อสาย LAN แล้วแต่เน็ตไม่มา ขึ้นรูปกากบาทสีแดง",
+        symptom:
+            "ต่อสาย LAN แล้วแต่เน็ตไม่มา ขึ้นรูปกากบาทสีแดง",
+
         tool: "hw",
-        toolHint: "🔌 Cable Tester: ไฟติดไม่ครบ 8 เส้น",
-        correct: "ทำการเข้าหัวสาย LAN ใหม่ หรือเปลี่ยนสาย LAN ใหม่",
+
+        toolHint:
+            "🔌 Cable Tester: ไฟติดไม่ครบ 8 เส้น",
+
+        correct:
+            "ทำการเข้าหัวสาย LAN ใหม่ หรือเปลี่ยนสาย LAN ใหม่",
+
         wrong: [
             "เข้าไปรีเซ็ตค่าเครือข่ายและการบูตในหน้า BIOS ใหม่",
             "ลงไดรเวอร์ Network ใหม่ และอัปเดตระบบปฏิบัติการ",
@@ -108,10 +184,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เปิดเครื่องเจอจอฟ้า (BSOD) รหัส Memory Management",
+        symptom:
+            "เปิดเครื่องเจอจอฟ้า (BSOD) รหัส Memory Management",
+
         tool: "beep",
-        toolHint: "🔊 Beep Code: เสียงดังสั้น 3 ครั้ง",
-        correct: "สลับแถว RAM เพื่อทดสอบ หรือเปลี่ยน RAM แถวที่เสีย",
+
+        toolHint:
+            "🔊 Beep Code: เสียงดังสั้น 3 ครั้ง",
+
+        correct:
+            "สลับแถว RAM เพื่อทดสอบ หรือเปลี่ยน RAM แถวที่เสีย",
+
         wrong: [
             "ทำความสะอาดพัดลมระบายความร้อนและทาซิลิโคน CPU",
             "เข้า Safe Mode เพื่อถอนการติดตั้งไดรเวอร์การ์ดจอ",
@@ -120,10 +203,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เครื่องส่งเสียงร้องเตือนต่อเนื่องไม่หยุดเมื่อกดปุ่มเปิด",
+        symptom:
+            "เครื่องส่งเสียงร้องเตือนต่อเนื่องไม่หยุดเมื่อกดปุ่มเปิด",
+
         tool: "beep",
-        toolHint: "🔊 Beep Code: ดังยาวต่อเนื่องไม่หยุด",
-        correct: "ตรวจสอบการติดตั้ง RAM ว่าเสียบลงสล็อตแน่นสนิทหรือไม่",
+
+        toolHint:
+            "🔊 Beep Code: ดังยาวต่อเนื่องไม่หยุด",
+
+        correct:
+            "ตรวจสอบการติดตั้ง RAM ว่าเสียบลงสล็อตแน่นสนิทหรือไม่",
+
         wrong: [
             "เปลี่ยนแบตเตอรี่ CMOS บนเมนบอร์ดเนื่องจากไฟหมด",
             "เปลี่ยนสายสัญญาณเชื่อมต่อระหว่างจอภาพและตัวเครื่อง",
@@ -132,10 +222,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "Windows มองเห็น RAM เพียงครึ่งเดียวจากที่ติดตั้งไว้",
+        symptom:
+            "Windows มองเห็น RAM เพียงครึ่งเดียวจากที่ติดตั้งไว้",
+
         tool: "task",
-        toolHint: "📊 Task Manager: Hardware Reserved กินพื้นที่ RAM สูงมาก",
-        correct: "ถอด RAM ทั้งหมดมาทำความสะอาดและใส่กลับให้ถูก Dual Channel",
+
+        toolHint:
+            "📊 Task Manager: Hardware Reserved กินพื้นที่ RAM สูงมาก",
+
+        correct:
+            "ถอด RAM ทั้งหมดมาทำความสะอาดและใส่กลับให้ถูก Dual Channel",
+
         wrong: [
             "เข้าไปอัปเดตไดรเวอร์ของการ์ดจอให้เป็นเวอร์ชันล่าสุด",
             "ใช้โปรแกรมสแกนไวรัสแบบ Full Scan เพื่อลบมัลแวร์",
@@ -144,10 +241,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เล่นเกมแล้วเฟรมเรตตกฮวบ เครื่องหน่วงผิดปกติ",
+        symptom:
+            "เล่นเกมแล้วเฟรมเรตตกฮวบ เครื่องหน่วงผิดปกติ",
+
         tool: "task",
-        toolHint: "📊 Task Manager: CPU วิ่งที่ 0.8 GHz ตลอดเวลา",
-        correct: "ตรวจสอบชุดระบายความร้อน CPU ว่าประกบแนบสนิทหรือไม่",
+
+        toolHint:
+            "📊 Task Manager: CPU วิ่งที่ 0.8 GHz ตลอดเวลา",
+
+        correct:
+            "ตรวจสอบชุดระบายความร้อน CPU ว่าประกบแนบสนิทหรือไม่",
+
         wrong: [
             "เปลี่ยนสาย LAN เป็นสาย Cat6 เพื่อเพิ่มความเร็วเน็ต",
             "ถอดการ์ดจอส่งเคลมศูนย์บริการเนื่องจากชิปประมวลผลพัง",
@@ -156,10 +260,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เปิดเครื่องปุ๊บ พัดลม CPU หมุนกระตุกแล้วดับทันที",
+        symptom:
+            "เปิดเครื่องปุ๊บ พัดลม CPU หมุนกระตุกแล้วดับทันที",
+
         tool: "led",
-        toolHint: "💡 Debug LED: ไฟ CPU กะพริบสั้นๆ แล้วดับ",
-        correct: "ตรวจสอบสายไฟเลี้ยง CPU (4-pin/8-pin) ว่าเสียบแน่นหรือไม่",
+
+        toolHint:
+            "💡 Debug LED: ไฟ CPU กะพริบสั้นๆ แล้วดับ",
+
+        correct:
+            "ตรวจสอบสายไฟเลี้ยง CPU (4-pin/8-pin) ว่าเสียบแน่นหรือไม่",
+
         wrong: [
             "เข้าไปตั้งค่าลำดับการบูต (Boot Order) ในหน้าต่าง BIOS",
             "ใช้ยางลบขัดหน้าสัมผัสทองเหลืองของการ์ดแสดงผล (VGA)",
@@ -168,10 +279,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "หน้าจอมืดสนิท แต่มีเสียงเข้า Windows และพิมพ์งานได้",
+        symptom:
+            "หน้าจอมืดสนิท แต่มีเสียงเข้า Windows และพิมพ์งานได้",
+
         tool: "hw",
-        toolHint: "🔌 ตรวจสอบกายภาพ: สายไฟเลี้ยงการ์ดจอเสียบครบ จอเปิดติด",
-        correct: "ตรวจสอบสายสัญญาณ (HDMI/DP) และสลับช่องเสียบจอภาพ",
+
+        toolHint:
+            "🔌 ตรวจสอบกายภาพ: สายไฟเลี้ยงการ์ดจอเสียบครบ จอเปิดติด",
+
+        correct:
+            "ตรวจสอบสายสัญญาณ (HDMI/DP) และสลับช่องเสียบจอภาพ",
+
         wrong: [
             "ถอดซิงก์ระบายความร้อนเพื่อทาซิลิโคน CPU ใหม่ทันที",
             "เข้าไปปรับค่า Boot Order ใน BIOS ให้เลือกบูตจาก SSD",
@@ -180,10 +298,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เครื่องเปิดติด ภาพขึ้น แต่ความละเอียดหน้าจอล็อกไว้ต่ำมาก",
+        symptom:
+            "เครื่องเปิดติด ภาพขึ้น แต่ความละเอียดหน้าจอล็อกไว้ต่ำมาก",
+
         tool: "task",
-        toolHint: "📊 Task Manager: มองไม่เห็นชื่อรุ่นการ์ดจอในแท็บ Performance",
-        correct: "ดาวน์โหลดและติดตั้งไดรเวอร์การ์ดจอเวอร์ชันล่าสุดให้ตรงรุ่น",
+
+        toolHint:
+            "📊 Task Manager: มองไม่เห็นชื่อรุ่นการ์ดจอในแท็บ Performance",
+
+        correct:
+            "ดาวน์โหลดและติดตั้งไดรเวอร์การ์ดจอเวอร์ชันล่าสุดให้ตรงรุ่น",
+
         wrong: [
             "ถอด RAM ออกมาขัดหน้าสัมผัสด้วยยางลบแล้วใส่กลับเข้าที่",
             "อัปเดตระบบปฏิบัติการ Windows เพื่อซ่อมแซมไฟล์ระบบ Boot",
@@ -192,10 +317,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เปิดเครื่องมาเจอข้อความ No Bootable Device Found",
+        symptom:
+            "เปิดเครื่องมาเจอข้อความ No Bootable Device Found",
+
         tool: "led",
-        toolHint: "💡 Debug LED: ค้างที่ไฟ BOOT",
-        correct: "เข้าไปตรวจสอบสถานะฮาร์ดดิสก์และตั้งค่า Boot Order ใน BIOS",
+
+        toolHint:
+            "💡 Debug LED: ค้างที่ไฟ BOOT",
+
+        correct:
+            "เข้าไปตรวจสอบสถานะฮาร์ดดิสก์และตั้งค่า Boot Order ใน BIOS",
+
         wrong: [
             "ทำการเข้าหัวสาย LAN ใหม่ด้วยคีมย้ำสายเพื่อรับสัญญาณเน็ต",
             "ถอดการ์ดจอออกแล้วใช้การ์ดจอออนบอร์ดเพื่อทดสอบภาพ",
@@ -204,10 +336,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "มีเสียงดังคลิกๆ แก๊กๆ ออกมาจากภายในเคสคอมพิวเตอร์",
+        symptom:
+            "มีเสียงดังคลิกๆ แก๊กๆ ออกมาจากภายในเคสคอมพิวเตอร์",
+
         tool: "hw",
-        toolHint: "🪛 ตรวจสอบกายภาพ: เสียงดังมาจากบริเวณช่องใส่ฮาร์ดดิสก์ HDD",
-        correct: "สำรองข้อมูลด่วนและเตรียมตัวเปลี่ยนฮาร์ดดิสก์ลูกใหม่",
+
+        toolHint:
+            "🪛 ตรวจสอบกายภาพ: เสียงดังมาจากบริเวณช่องใส่ฮาร์ดดิสก์ HDD",
+
+        correct:
+            "สำรองข้อมูลด่วนและเตรียมตัวเปลี่ยนฮาร์ดดิสก์ลูกใหม่",
+
         wrong: [
             "ทำการเป่าฝุ่นและหยอดน้ำมันหล่อลื่นที่พัดลมของ Power Supply",
             "ทำความสะอาดหน้าสัมผัส RAM ด้วยน้ำยา Contact Cleaner",
@@ -216,10 +355,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เวลาและวันที่ของคอมพิวเตอร์รีเซ็ตใหม่ทุกครั้งที่เปิดเครื่อง",
+        symptom:
+            "เวลาและวันที่ของคอมพิวเตอร์รีเซ็ตใหม่ทุกครั้งที่เปิดเครื่อง",
+
         tool: "hw",
-        toolHint: "🪛 ตรวจสอบกายภาพ: ตัวถ่านกระดุมบนเมนบอร์ดมีคราบออกไซด์",
-        correct: "ซื้อแบตเตอรี่ CMOS (CR2032) ก้อนใหม่มาเปลี่ยนบนเมนบอร์ด",
+
+        toolHint:
+            "🪛 ตรวจสอบกายภาพ: ตัวถ่านกระดุมบนเมนบอร์ดมีคราบออกไซด์",
+
+        correct:
+            "ซื้อแบตเตอรี่ CMOS (CR2032) ก้อนใหม่มาเปลี่ยนบนเมนบอร์ด",
+
         wrong: [
             "ปรับการตั้งค่า Time Zone ใน Windows ให้เป็น +07:00 Bangkok",
             "ลงระบบปฏิบัติการ Windows ใหม่เพื่อแก้ปัญหาไฟล์ Registry เสีย",
@@ -228,10 +374,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เล่นเกมกราฟิกสูงแล้วเครื่องดับวูบไปเลยทันที",
+        symptom:
+            "เล่นเกมกราฟิกสูงแล้วเครื่องดับวูบไปเลยทันที",
+
         tool: "hw",
-        toolHint: "🌡️ HWMonitor: อุณหภูมิ CPU และ GPU ปกติ ไม่เกิน 75°C",
-        correct: "เปลี่ยน Power Supply ที่มีกำลังวัตต์ (Watt) สูงขึ้นให้พอกับระบบ",
+
+        toolHint:
+            "🌡️ HWMonitor: อุณหภูมิ CPU และ GPU ปกติ ไม่เกิน 75°C",
+
+        correct:
+            "เปลี่ยน Power Supply ที่มีกำลังวัตต์ (Watt) สูงขึ้นให้พอกับระบบ",
+
         wrong: [
             "เพิ่มพัดลมระบายความร้อนในเคสเพื่อไล่อากาศร้อนออกไป",
             "เข้าไปตั้งค่า Task Manager เพื่อลดการใช้ทรัพยากรพื้นหลัง",
@@ -240,10 +393,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "ไอคอน Wi-Fi หายไปจากแถบ Taskbar มุมขวาล่าง",
+        symptom:
+            "ไอคอน Wi-Fi หายไปจากแถบ Taskbar มุมขวาล่าง",
+
         tool: "task",
-        toolHint: "📊 Device Manager: มีเครื่องหมายตกใจสีเหลืองที่ Network Adapter",
-        correct: "คลิกขวาเลือก Update Driver หรือลงไดรเวอร์ Wi-Fi ใหม่",
+
+        toolHint:
+            "📊 Device Manager: มีเครื่องหมายตกใจสีเหลืองที่ Network Adapter",
+
+        correct:
+            "คลิกขวาเลือก Update Driver หรือลงไดรเวอร์ Wi-Fi ใหม่",
+
         wrong: [
             "เปลี่ยนสายสัญญาณจอภาพและเช็กความละเอียดหน้าจอ",
             "ทำการ Clear CMOS เพื่อรีเซ็ตเมนบอร์ดให้เป็นค่าโรงงาน",
@@ -252,10 +412,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เข้าเว็บไซต์บางเว็บได้ แต่บางเว็บขึ้น Error โหลดไม่ขึ้น",
+        symptom:
+            "เข้าเว็บไซต์บางเว็บได้ แต่บางเว็บขึ้น Error โหลดไม่ขึ้น",
+
         tool: "task",
-        toolHint: "📊 ตรวจสอบ Command Prompt: ปิงหา 8.8.8.8 เจอปกติ",
-        correct: "ตรวจสอบการตั้งค่า DNS Server หรือรีสตาร์ทเราเตอร์อินเทอร์เน็ต",
+
+        toolHint:
+            "📊 ตรวจสอบ Command Prompt: ปิงหา 8.8.8.8 เจอปกติ",
+
+        correct:
+            "ตรวจสอบการตั้งค่า DNS Server หรือรีสตาร์ทเราเตอร์อินเทอร์เน็ต",
+
         wrong: [
             "ถอดฮาร์ดดิสก์ไปสแกนหาไวรัสกับคอมพิวเตอร์เครื่องอื่น",
             "เป่าฝุ่นทำความสะอาดช่องเสียบสาย LAN บนตัวเมนบอร์ด",
@@ -264,10 +431,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เครื่องมีโฆษณาเด้งขึ้นมาเองที่มุมจอตลอดเวลา",
+        symptom:
+            "เครื่องมีโฆษณาเด้งขึ้นมาเองที่มุมจอตลอดเวลา",
+
         tool: "task",
-        toolHint: "📊 Task Manager: พบโปรแกรมชื่อแปลกๆ กิน CPU สูงในแท็บ Startup",
-        correct: "ปิดโปรแกรมต้องสงสัยในแท็บ Startup และสแกนหา Malware",
+
+        toolHint:
+            "📊 Task Manager: พบโปรแกรมชื่อแปลกๆ กิน CPU สูงในแท็บ Startup",
+
+        correct:
+            "ปิดโปรแกรมต้องสงสัยในแท็บ Startup และสแกนหา Malware",
+
         wrong: [
             "ฟอร์แมตฮาร์ดดิสก์ทิ้งทันทีเพื่อป้องกันไวรัสกระจายตัว",
             "ถอดซิงก์ CPU ออกมาทำความสะอาดเพื่อลดความร้อน",
@@ -276,10 +450,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เปิดคอมพิวเตอร์ขึ้นมาเจอหน้าจอให้โอนเงินค่าไถ่ข้อมูล",
+        symptom:
+            "เปิดคอมพิวเตอร์ขึ้นมาเจอหน้าจอให้โอนเงินค่าไถ่ข้อมูล",
+
         tool: "task",
-        toolHint: "📊 สถานการณ์: ข้อมูลในเครื่องถูกเปลี่ยนนามสกุลเป็นแปลกๆ (Ransomware)",
-        correct: "ตัดการเชื่อมต่อเครือข่ายทันที และเตรียมตัวลงระบบปฏิบัติการใหม่",
+
+        toolHint:
+            "📊 สถานการณ์: ข้อมูลในเครื่องถูกเปลี่ยนนามสกุลเป็นแปลกๆ (Ransomware)",
+
+        correct:
+            "ตัดการเชื่อมต่อเครือข่ายทันที และเตรียมตัวลงระบบปฏิบัติการใหม่",
+
         wrong: [
             "ทำการทาซิลิโคน CPU ใหม่เพื่อให้เครื่องประมวลผลถอดรหัสได้ไวขึ้น",
             "รีบโอนเงินตามที่แฮกเกอร์เรียกร้องเพื่อความปลอดภัยของข้อมูล",
@@ -288,10 +469,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เสียบแฟลชไดรฟ์ที่ช่อง USB หน้าเคสแล้วไม่อ่าน",
+        symptom:
+            "เสียบแฟลชไดรฟ์ที่ช่อง USB หน้าเคสแล้วไม่อ่าน",
+
         tool: "hw",
-        toolHint: "🪛 ตรวจสอบกายภาพ: เสียบด้านหลังเมนบอร์ดอ่านข้อมูลได้ปกติ",
-        correct: "เปิดฝาเคสตรวจสอบสาย Front Panel USB ว่าเสียบลงเมนบอร์ดแน่นไหม",
+
+        toolHint:
+            "🪛 ตรวจสอบกายภาพ: เสียบด้านหลังเมนบอร์ดอ่านข้อมูลได้ปกติ",
+
+        correct:
+            "เปิดฝาเคสตรวจสอบสาย Front Panel USB ว่าเสียบลงเมนบอร์ดแน่นไหม",
+
         wrong: [
             "อัปเดตระบบปฏิบัติการ Windows ให้รองรับพอร์ต USB 3.0",
             "เปลี่ยน Power Supply ตัวใหม่เพื่อให้จ่ายไฟไปหน้าเคสได้พอ",
@@ -300,10 +488,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เสียบหูฟังที่ช่องหน้าเคสแล้วไม่มีเสียงออก",
+        symptom:
+            "เสียบหูฟังที่ช่องหน้าเคสแล้วไม่มีเสียงออก",
+
         tool: "task",
-        toolHint: "📊 Sound Settings: ระบบเลือก Output เป็นหน้าจอผ่านสาย HDMI อยู่",
-        correct: "คลิกที่ไอคอนลำโพง แล้วเปลี่ยน Playback Device ให้เป็นช่องหูฟัง",
+
+        toolHint:
+            "📊 Sound Settings: ระบบเลือก Output เป็นหน้าจอผ่านสาย HDMI อยู่",
+
+        correct:
+            "คลิกที่ไอคอนลำโพง แล้วเปลี่ยน Playback Device ให้เป็นช่องหูฟัง",
+
         wrong: [
             "ซื้อการ์ดเสียง (Sound Card) แบบแยกมาติดตั้งเพิ่มเติม",
             "แกะเคสออกมาตรวจสอบสายสัญญาณภาพว่าเสียบแน่นหรือไม่",
@@ -312,10 +507,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "คอมพิวเตอร์ทำงานปกติ แต่ไฟ RGB ที่พัดลมเคสไม่ติด",
+        symptom:
+            "คอมพิวเตอร์ทำงานปกติ แต่ไฟ RGB ที่พัดลมเคสไม่ติด",
+
         tool: "hw",
-        toolHint: "🪛 ตรวจสอบกายภาพ: พัดลมหมุนปกติ แต่สายไฟเส้นเล็กๆ หลุดอยู่",
-        correct: "ตรวจสอบสาย ARGB 5V หรือ 12V RGB ว่าเสียบลงกล่องคอนโทรลเลอร์หรือไม่",
+
+        toolHint:
+            "🪛 ตรวจสอบกายภาพ: พัดลมหมุนปกติ แต่สายไฟเส้นเล็กๆ หลุดอยู่",
+
+        correct:
+            "ตรวจสอบสาย ARGB 5V หรือ 12V RGB ว่าเสียบลงกล่องคอนโทรลเลอร์หรือไม่",
+
         wrong: [
             "เปลี่ยน Power Supply เพราะไฟไม่พอเลี้ยงระบบแสงสว่าง",
             "อัปเดต BIOS เพื่อปลดล็อกฟีเจอร์แสงไฟสเปกตรัม",
@@ -324,10 +526,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "ประกอบคอมใหม่ เปิดติด แต่ไฟ Debug LED ค้างที่ CPU และ RAM สลับกัน",
+        symptom:
+            "ประกอบคอมใหม่ เปิดติด แต่ไฟ Debug LED ค้างที่ CPU และ RAM สลับกัน",
+
         tool: "hw",
-        toolHint: "🪛 ตรวจสอบกายภาพ: พบรอยงอที่ขา Socket ของเมนบอร์ดบริเวณใกล้ๆ CPU",
-        correct: "ส่งเคลมเมนบอร์ด หรือใช้เข็มเขี่ยดัดขา Socket กลับมาอย่างระมัดระวัง",
+
+        toolHint:
+            "🪛 ตรวจสอบกายภาพ: พบรอยงอที่ขา Socket ของเมนบอร์ดบริเวณใกล้ๆ CPU",
+
+        correct:
+            "ส่งเคลมเมนบอร์ด หรือใช้เข็มเขี่ยดัดขา Socket กลับมาอย่างระมัดระวัง",
+
         wrong: [
             "เข้าไปปรับความเร็วรอบพัดลม CPU ใน BIOS ให้หมุนเต็ม 100%",
             "ใช้ยางลบขัดหน้าสัมผัส CPU และ RAM อย่างรุนแรงเพื่อขจัดคราบ",
@@ -336,10 +545,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "กดเปิดเครื่อง พัดลมกระตุก 1 วินาทีแล้วนิ่ง ไฟไม่เข้าอีกเลย",
+        symptom:
+            "กดเปิดเครื่อง พัดลมกระตุก 1 วินาทีแล้วนิ่ง ไฟไม่เข้าอีกเลย",
+
         tool: "hw",
-        toolHint: "🔌 เช็กสายไฟ: เมื่อถอดสายไฟเลี้ยงการ์ดจอออก เครื่องเปิดติดปกติ",
-        correct: "ภาคจ่ายไฟของการ์ดจอช็อต ต้องส่งซ่อมวงจรการ์ดแสดงผล",
+
+        toolHint:
+            "🔌 เช็กสายไฟ: เมื่อถอดสายไฟเลี้ยงการ์ดจอออก เครื่องเปิดติดปกติ",
+
+        correct:
+            "ภาคจ่ายไฟของการ์ดจอช็อต ต้องส่งซ่อมวงจรการ์ดแสดงผล",
+
         wrong: [
             "Power Supply เสียหายอย่างหนัก ต้องซื้อเปลี่ยนใหม่ทันที",
             "ถ่าน BIOS หมดอายุการใช้งาน ทำให้วงจรเริ่มการบูตล้มเหลว",
@@ -348,10 +564,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เครื่องค้าง (Freeze) ขยับเมาส์ไม่ได้ ต้องกดปุ่ม Power แช่เพื่อปิด",
+        symptom:
+            "เครื่องค้าง (Freeze) ขยับเมาส์ไม่ได้ ต้องกดปุ่ม Power แช่เพื่อปิด",
+
         tool: "task",
-        toolHint: "📊 Event Viewer: พบข้อความ Kernel-Power Error 41",
-        correct: "ตรวจสอบสภาพ Power Supply และตั้งค่าปิด Fast Startup ใน Windows",
+
+        toolHint:
+            "📊 Event Viewer: พบข้อความ Kernel-Power Error 41",
+
+        correct:
+            "ตรวจสอบสภาพ Power Supply และตั้งค่าปิด Fast Startup ใน Windows",
+
         wrong: [
             "เปลี่ยนสายสัญญาณภาพ (HDMI) เป็นสาย DisplayPort แทน",
             "เข้าเซฟโหมดเพื่อทำการลบไดรเวอร์เสียง (Audio) ออกทั้งหมด",
@@ -360,10 +583,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เวลาใช้งานโปรแกรมหนักๆ จอจะดับไป 2 วินาทีแล้วติดขึ้นมาใหม่",
+        symptom:
+            "เวลาใช้งานโปรแกรมหนักๆ จอจะดับไป 2 วินาทีแล้วติดขึ้นมาใหม่",
+
         tool: "hw",
-        toolHint: "🌡️ HWMonitor: อุณหภูมิการ์ดจอปกติ แต่สายอแดปเตอร์จอภาพร้อนมาก",
-        correct: "เปลี่ยนอแดปเตอร์หรือสายไฟของจอภาพ (Monitor Power Adapter)",
+
+        toolHint:
+            "🌡️ HWMonitor: อุณหภูมิการ์ดจอปกติ แต่สายอแดปเตอร์จอภาพร้อนมาก",
+
+        correct:
+            "เปลี่ยนอแดปเตอร์หรือสายไฟของจอภาพ (Monitor Power Adapter)",
+
         wrong: [
             "อัปเกรด RAM เพื่อให้รองรับการประมวลผลกราฟิกที่หนักขึ้น",
             "เปลี่ยนการ์ดจอตัวใหม่เนื่องจากชิป VRAM เสื่อมสภาพ",
@@ -372,10 +602,17 @@ const masterCasePool = [
     },
 
     {
-        symptom: "เข้าหน้า BIOS ได้ปกติ แต่พอจะโหลดเข้า Windows เครื่องจะรีสตาร์ทเองเสมอ",
+        symptom:
+            "เข้าหน้า BIOS ได้ปกติ แต่พอจะโหลดเข้า Windows เครื่องจะรีสตาร์ทเองเสมอ",
+
         tool: "led",
-        toolHint: "💡 Debug LED: ไฟวิ่งผ่านครบ 4 ดวงปกติ แต่รีสตาร์ทวนลูป",
-        correct: "ใช้ USB Bootable ทำการซ่อมแซม Windows (Startup Repair)",
+
+        toolHint:
+            "💡 Debug LED: ไฟวิ่งผ่านครบ 4 ดวงปกติ แต่รีสตาร์ทวนลูป",
+
+        correct:
+            "ใช้ USB Bootable ทำการซ่อมแซม Windows (Startup Repair)",
+
         wrong: [
             "เปลี่ยน Power Supply เนื่องจากจ่ายไฟช่วงโหลดเข้าระบบไม่พอ",
             "สลับช่องเสียบ RAM เพื่อแก้ปัญหาคอขวดของการโอนถ่ายข้อมูล",
@@ -385,11 +622,53 @@ const masterCasePool = [
 
 ];
 
+
+// =====================================================
+// Accuracy
+// =====================================================
+
+function getAccuracy() {
+
+    if (totalAttempts === 0) {
+        return 0;
+    }
+
+    return Math.round(
+        (correctAttempts / totalAttempts) * 100
+    );
+}
+
+
+// =====================================================
+// Sync Leaderboard
+// =====================================================
+
+function syncLeaderboard() {
+
+    if (
+        typeof window.syncDataToServer !==
+        "function"
+    ) {
+        return;
+    }
+
+    window.syncDataToServer(
+        shopName,
+        stars,
+        gold,
+        getAccuracy(),
+        totalAttempts,
+        correctAttempts
+    );
+}
+
+
 // =====================================================
 // Custom Alert
 // =====================================================
 
 let alertCallback = null;
+
 
 window.showAlert = function(
     title,
@@ -398,29 +677,71 @@ window.showAlert = function(
     callback = null
 ) {
 
-    document.getElementById('alert-title').innerText = title;
-    document.getElementById('alert-icon').innerText = icon;
+    document
+        .getElementById(
+            "alert-title"
+        )
+        .innerText =
+        title;
 
-    document.getElementById('alert-message').innerHTML =
-        message.replace(/\n/g, '<br>');
 
-    document.getElementById('custom-alert')
-        .classList.remove('hidden');
+    document
+        .getElementById(
+            "alert-icon"
+        )
+        .innerText =
+        icon;
 
-    alertCallback = callback;
+
+    document
+        .getElementById(
+            "alert-message"
+        )
+        .innerHTML =
+        message.replace(
+            /\n/g,
+            "<br>"
+        );
+
+
+    document
+        .getElementById(
+            "custom-alert"
+        )
+        .classList
+        .remove(
+            "hidden"
+        );
+
+
+    alertCallback =
+        callback;
 };
 
 
 window.closeAlert = function() {
 
-    document.getElementById('custom-alert')
-        .classList.add('hidden');
+    document
+        .getElementById(
+            "custom-alert"
+        )
+        .classList
+        .add(
+            "hidden"
+        );
 
-    if (alertCallback) {
 
-        alertCallback();
+    if (
+        alertCallback
+    ) {
 
-        alertCallback = null;
+        const callback =
+            alertCallback;
+
+        alertCallback =
+            null;
+
+        callback();
     }
 };
 
@@ -429,43 +750,76 @@ window.closeAlert = function() {
 // Terminal
 // =====================================================
 
-function logCMD(msg, type = "normal") {
+function logCMD(
+    msg,
+    type = "normal"
+) {
 
     const cmdBox =
-        document.getElementById('cmd-terminal');
+        document
+            .getElementById(
+                "cmd-terminal"
+            );
 
-    if (!cmdBox) return;
+
+    if (!cmdBox) {
+        return;
+    }
 
 
     const line =
-        document.createElement('div');
+        document
+            .createElement(
+                "div"
+            );
 
-    line.className = 'cmd-line';
+
+    line.className =
+        "cmd-line";
 
 
     const time =
-        new Date().toLocaleTimeString(
-            'th-TH',
-            {
-                hour12: false
-            }
-        );
+        new Date()
+            .toLocaleTimeString(
+                "th-TH",
+                {
+                    hour12:
+                        false
+                }
+            );
 
 
     const prefix =
         `[${time}] root@DiagOS> `;
 
 
-    if (type === "error") {
-        line.className += ' cmd-error';
+    if (
+        type ===
+        "error"
+    ) {
+
+        line.className +=
+            " cmd-error";
     }
 
-    if (type === "success") {
-        line.className += ' cmd-success';
+
+    if (
+        type ===
+        "success"
+    ) {
+
+        line.className +=
+            " cmd-success";
     }
 
-    if (type === "warn") {
-        line.className += ' cmd-warn';
+
+    if (
+        type ===
+        "warn"
+    ) {
+
+        line.className +=
+            " cmd-warn";
     }
 
 
@@ -473,10 +827,36 @@ function logCMD(msg, type = "normal") {
         prefix + msg;
 
 
-    cmdBox.appendChild(line);
+    cmdBox.appendChild(
+        line
+    );
+
 
     cmdBox.scrollTop =
         cmdBox.scrollHeight;
+}
+
+
+// =====================================================
+// สุ่มเคส
+// =====================================================
+
+function createGamePool() {
+
+    return [
+        ...masterCasePool
+    ]
+
+        .sort(
+            () =>
+                Math.random() -
+                0.5
+        )
+
+        .slice(
+            0,
+            maxCases
+        );
 }
 
 
@@ -489,13 +869,16 @@ window.startGame = function() {
     const inputName =
         document
             .getElementById(
-                'shop-name-input'
+                "shop-name-input"
             )
             .value
             .trim();
 
 
-    if (inputName.length < 2) {
+    if (
+        inputName.length <
+        2
+    ) {
 
         showAlert(
             "ข้อผิดพลาด",
@@ -507,50 +890,40 @@ window.startGame = function() {
     }
 
 
-    shopName = inputName;
+    shopName =
+        inputName;
 
 
     document
         .getElementById(
-            'login-screen'
+            "login-screen"
         )
         .classList
-        .add('hidden');
+        .add(
+            "hidden"
+        );
 
 
     document
         .getElementById(
-            'game-screen'
+            "game-screen"
         )
         .classList
-        .remove('hidden');
+        .remove(
+            "hidden"
+        );
 
 
     gamePool =
-        masterCasePool
-            .sort(() => 0.5 - Math.random())
-            .slice(0, maxCases);
+        createGamePool();
 
 
-    // ค่าเริ่มกะ
     gold -= 10;
 
 
     updateUI();
 
-
-    // ส่งข้อมูลเริ่มต้นขึ้น Firebase
-    if (
-        typeof window.syncDataToServer ===
-        'function'
-    ) {
-
-        window.syncDataToServer(
-            shopName,
-            stars,
-            gold
-        );
-    }
+    syncLeaderboard();
 
 
     logCMD(
@@ -570,58 +943,48 @@ window.startGame = function() {
 
 function loadCase() {
 
-    if (currentCaseNum > maxCases) {
+    if (
+        currentCaseNum >
+        maxCases
+    ) {
 
         showAlert(
+
             "รายงานการประเมินผล",
 
             `🎉 จบกะการทำงาน!
-คุณทำได้ ${stars} ดาว
-เริ่มกะใหม่เพื่อสะสมดาวและเงินต่อ!`,
+
+⭐ ดาวสะสม: ${stars}
+🎯 Accuracy: ${getAccuracy()}%
+✅ ตอบถูก: ${correctAttempts}
+📝 ตอบทั้งหมด: ${totalAttempts}
+
+เริ่มกะใหม่เพื่อสะสมคะแนนต่อ!`,
 
             "🏆",
 
             () => {
 
-                currentCaseNum = 1;
+                currentCaseNum =
+                    1;
 
 
                 gamePool =
-                    masterCasePool
-                        .sort(
-                            () =>
-                                0.5 -
-                                Math.random()
-                        )
-                        .slice(
-                            0,
-                            maxCases
-                        );
+                    createGamePool();
 
 
-                // หักค่าเริ่มกะใหม่
                 gold -= 10;
 
 
-                // ส่งข้อมูลล่าสุดขึ้น Leaderboard
-                if (
-                    typeof window.syncDataToServer ===
-                    'function'
-                ) {
-
-                    window.syncDataToServer(
-                        shopName,
-                        stars,
-                        gold
-                    );
-                }
+                syncLeaderboard();
 
 
                 document
                     .getElementById(
-                        'cmd-terminal'
+                        "cmd-terminal"
                     )
-                    .innerHTML = '';
+                    .innerHTML =
+                    "";
 
 
                 logCMD(
@@ -646,6 +1009,204 @@ function loadCase() {
 
 
 // =====================================================
+// สถานะการวิเคราะห์
+// =====================================================
+
+function ensureAnalysisStatus() {
+
+    let status =
+        document
+            .getElementById(
+                "analysis-status"
+            );
+
+
+    const actionDiv =
+        document
+            .getElementById(
+                "action-buttons"
+            );
+
+
+    if (
+        status ||
+        !actionDiv
+    ) {
+
+        return status;
+    }
+
+
+    status =
+        document
+            .createElement(
+                "div"
+            );
+
+
+    status.id =
+        "analysis-status";
+
+
+    status.style.margin =
+        "0 0 12px";
+
+
+    status.style.padding =
+        "12px 14px";
+
+
+    status.style.border =
+        "1px solid #334155";
+
+
+    status.style.borderRadius =
+        "9px";
+
+
+    status.style.background =
+        "#0f172a";
+
+
+    status.style.color =
+        "#cbd5e1";
+
+
+    status.style.fontSize =
+        "12px";
+
+
+    status.style.lineHeight =
+        "1.7";
+
+
+    actionDiv
+        .parentNode
+        .insertBefore(
+            status,
+            actionDiv
+        );
+
+
+    return status;
+}
+
+
+// =====================================================
+// ปลดล็อกคำตอบ
+// =====================================================
+
+function canAnswerCurrentCase() {
+
+    return (
+        usedTools.size >= 2 &&
+        evidenceFound === true &&
+        caseAnswered === false
+    );
+}
+
+
+function updateAnswerLockState() {
+
+    const canAnswer =
+        canAnswerCurrentCase();
+
+
+    const buttons =
+        document
+            .querySelectorAll(
+                ".answer-btn"
+            );
+
+
+    buttons.forEach(
+        button => {
+
+            if (
+                button.dataset.aiRemoved ===
+                "true"
+            ) {
+
+                button.disabled =
+                    true;
+
+                return;
+            }
+
+
+            button.disabled =
+                !canAnswer;
+
+
+            button.style.opacity =
+                canAnswer
+                    ? "1"
+                    : "0.45";
+
+
+            button.style.cursor =
+                canAnswer
+                    ? "pointer"
+                    : "not-allowed";
+        }
+    );
+
+
+    const status =
+        ensureAnalysisStatus();
+
+
+    if (!status) {
+        return;
+    }
+
+
+    if (
+        caseAnswered
+    ) {
+
+        status.innerHTML =
+            "✅ เคสนี้ได้รับคำตอบแล้ว";
+
+        return;
+    }
+
+
+    if (
+        usedTools.size <
+        2
+    ) {
+
+        status.innerHTML =
+            `🔒 <b>คำตอบยังล็อก</b><br>
+            ตรวจสอบอย่างน้อย 2 เครื่องมือก่อนตอบ
+            (${usedTools.size}/2)`;
+
+        return;
+    }
+
+
+    if (
+        !evidenceFound
+    ) {
+
+        status.innerHTML =
+            `🔎 ตรวจแล้ว ${usedTools.size} เครื่องมือ
+            แต่ยังไม่พบหลักฐานผิดปกติ<br>
+            <b>ต้องตรวจเพิ่มก่อนตัดสินใจ</b>`;
+
+        return;
+    }
+
+
+    status.innerHTML =
+        `🔓 <b>พบหลักฐานแล้ว</b><br>
+        ตรวจแล้ว ${usedTools.size} เครื่องมือ
+        สามารถเลือกวิธีแก้ไขได้ 1 ครั้ง`;
+}
+
+
+// =====================================================
 // แสดงเคส
 // =====================================================
 
@@ -653,132 +1214,211 @@ function renderCase() {
 
     currentCaseData =
         gamePool[
-            currentCaseNum - 1
+            currentCaseNum -
+            1
         ];
 
 
+    // Reset ระบบวิเคราะห์
+    usedTools =
+        new Set();
+
+    evidenceFound =
+        false;
+
+    caseAnswered =
+        false;
+
+    toolCooldown =
+        false;
+
+
     document
         .getElementById(
-            'case-title'
+            "case-title"
         )
         .innerText =
-        `📋 เคสที่ ${currentCaseNum}/${maxCases} (หักค่าเช่าร้าน -$10)`;
+        `📋 เคสที่ ${currentCaseNum}/${maxCases} | วิเคราะห์ก่อนตอบ`;
 
 
     document
         .getElementById(
-            'case-symptom'
+            "case-symptom"
         )
         .innerText =
         currentCaseData.symptom;
 
 
-    document
-        .getElementById(
-            'clue-display'
-        )
-        .innerText =
-        "รอกดใช้เครื่องมือวิเคราะห์...";
+    const clueBox =
+        document
+            .getElementById(
+                "clue-display"
+            );
 
 
-    document
-        .getElementById(
-            'clue-display'
-        )
-        .style
-        .color =
-        "var(--text-muted)";
+    clueBox.innerText =
+        "🔒 คำตอบถูกล็อก — ตรวจอย่างน้อย 2 เครื่องมือ และค้นหาหลักฐานผิดปกติก่อน";
+
+
+    clueBox.style.color =
+        "#94a3b8";
 
 
     logCMD(
-        `--------------------------------`
+        "--------------------------------"
     );
+
 
     logCMD(
         `LOADING CASE ${currentCaseNum}...`
     );
+
 
     logCMD(
         `SYMPTOM: ${currentCaseData.symptom}`,
         "warn"
     );
 
+
     logCMD(
-        `AWAITING DIAGNOSTIC TOOLS...`
+        "RULE: USE AT LEAST 2 DIFFERENT TOOLS BEFORE ANSWERING.",
+        "warn"
     );
 
 
     const options = [
+
         currentCaseData.correct,
+
         ...currentCaseData.wrong
+
     ].sort(
         () =>
-            0.5 -
-            Math.random()
+            Math.random() -
+            0.5
     );
 
 
     const actionDiv =
-        document.getElementById(
-            'action-buttons'
-        );
+        document
+            .getElementById(
+                "action-buttons"
+            );
 
 
-    actionDiv.innerHTML = '';
+    actionDiv.innerHTML =
+        "";
 
 
     options.forEach(
-        opt => {
+        option => {
 
-            const btn =
-                document.createElement(
-                    'button'
-                );
+            const button =
+                document
+                    .createElement(
+                        "button"
+                    );
 
 
-            btn.className =
+            button.className =
                 "btn btn-outline answer-btn";
 
 
-            btn.innerText =
-                opt;
+            button.innerText =
+                option;
 
 
-            btn.onclick =
+            button.disabled =
+                true;
+
+
+            button.style.opacity =
+                "0.45";
+
+
+            button.style.cursor =
+                "not-allowed";
+
+
+            button.onclick =
                 () =>
                     takeAction(
-                        opt,
-                        btn
+                        option,
+                        button
                     );
 
 
             actionDiv.appendChild(
-                btn
+                button
             );
         }
     );
 
+
+    updateAnswerLockState();
 
     updateUI();
 }
 
 
 // =====================================================
-// เครื่องมือวิเคราะห์
+// ใช้เครื่องมือวิเคราะห์
 // =====================================================
 
-window.useTool = function(toolType) {
+window.useTool = function(
+    toolType
+) {
 
-    if (energy < 10) {
+    if (
+        caseAnswered
+    ) {
 
         logCMD(
-            "ERROR: INSUFFICIENT ENERGY TO RUN TOOL!",
-            "error"
+            "CASE ALREADY CLOSED.",
+            "warn"
         );
+
+        return;
+    }
+
+
+    if (
+        toolCooldown
+    ) {
+
+        logCMD(
+            "WAIT: READ THE PREVIOUS RESULT BEFORE USING ANOTHER TOOL.",
+            "warn"
+        );
+
+        return;
+    }
+
+
+    if (
+        usedTools.has(
+            toolType
+        )
+    ) {
+
+        showAlert(
+            "เครื่องมือนี้ตรวจแล้ว",
+            "คุณใช้เครื่องมือนี้ไปแล้ว การกดซ้ำจะไม่ช่วยเพิ่มหลักฐาน กรุณาเลือกเครื่องมือชนิดอื่น",
+            "🔎"
+        );
+
+        return;
+    }
+
+
+    if (
+        energy <
+        10
+    ) {
 
         showAlert(
             "พลังงานไม่เพียงพอ",
-            "พลังงานไม่พอ! ไปเบิก Energy Drink ที่ร้านค้า",
+            "พลังงานไม่พอสำหรับการตรวจ กรุณาใช้ Energy Drink",
             "🔋"
         );
 
@@ -786,7 +1426,28 @@ window.useTool = function(toolType) {
     }
 
 
+    toolCooldown =
+        true;
+
+
+    setTimeout(
+        () => {
+
+            toolCooldown =
+                false;
+
+        },
+
+        900
+    );
+
+
     energy -= 10;
+
+
+    usedTools.add(
+        toolType
+    );
 
 
     logCMD(
@@ -795,13 +1456,10 @@ window.useTool = function(toolType) {
 
 
     const clueBox =
-        document.getElementById(
-            'clue-display'
-        );
-
-
-    clueBox.style.color =
-        "#38bdf8";
+        document
+            .getElementById(
+                "clue-display"
+            );
 
 
     if (
@@ -809,12 +1467,21 @@ window.useTool = function(toolType) {
         currentCaseData.tool
     ) {
 
+        evidenceFound =
+            true;
+
+
         clueBox.innerText =
             currentCaseData.toolHint;
 
 
+        clueBox.style.color =
+            "#38bdf8";
+
+
         logCMD(
-            `> SYSTEM REPORT: ${currentCaseData.toolHint}`
+            `EVIDENCE FOUND: ${currentCaseData.toolHint}`,
+            "success"
         );
 
     } else {
@@ -823,25 +1490,31 @@ window.useTool = function(toolType) {
             normalToolMessages[
                 toolType
             ] ||
-            "ระบบทำงานปกติ ไม่พบข้อผิดพลาด";
+            "ระบบทำงานปกติ ไม่พบความผิดปกติ";
 
 
         clueBox.innerText =
             normalMsg;
 
 
+        clueBox.style.color =
+            "#94a3b8";
+
+
         logCMD(
-            `> SYSTEM REPORT: ${normalMsg} (-10% ENERGY)`
+            `NORMAL RESULT: ${normalMsg}`
         );
     }
 
+
+    updateAnswerLockState();
 
     updateUI();
 };
 
 
 // =====================================================
-// เลือกคำตอบ
+// ตอบคำถาม
 // =====================================================
 
 function takeAction(
@@ -849,74 +1522,116 @@ function takeAction(
     btnElement
 ) {
 
+    if (
+        caseAnswered
+    ) {
+
+        return;
+    }
+
+
+    if (
+        !canAnswerCurrentCase()
+    ) {
+
+        showAlert(
+
+            "ยังตอบไม่ได้",
+
+            `กรุณาวิเคราะห์ก่อนตอบ
+
+ต้องทำครบ:
+• ใช้เครื่องมืออย่างน้อย 2 ชนิด
+• พบหลักฐานผิดปกติ
+
+ตอนนี้ตรวจแล้ว ${usedTools.size} เครื่องมือ`,
+
+            "🔒"
+        );
+
+        return;
+    }
+
+
+    caseAnswered =
+        true;
+
+
+    totalAttempts++;
+
+
     document
         .querySelectorAll(
-            '.answer-btn'
+            ".answer-btn"
         )
         .forEach(
-            b =>
-                b.disabled = true
+            button => {
+
+                button.disabled =
+                    true;
+
+                button.style.cursor =
+                    "default";
+            }
         );
 
 
     logCMD(
-        `APPLYING FIX: ${selectedOpt}...`
+        `FINAL DECISION: ${selectedOpt}`
     );
 
 
-    // =========================
+    // ===============================
     // ตอบถูก
-    // =========================
+    // ===============================
 
     if (
         selectedOpt ===
         currentCaseData.correct
     ) {
 
+        correctAttempts++;
+
+        stars++;
+
+        gold += 50;
+
+
         btnElement
             .classList
             .replace(
-                'btn-outline',
-                'btn-success'
+                "btn-outline",
+                "btn-success"
             );
 
 
         logCMD(
-            "SYSTEM RESTORED! DIAGNOSIS CORRECT.",
+            "CORRECT DIAGNOSIS.",
             "success"
         );
+
+
+        logCMD(
+            `ACCURACY: ${getAccuracy()}%`,
+            "success"
+        );
+
+
+        updateUI();
+
+        syncLeaderboard();
 
 
         setTimeout(
             () => {
 
-                gold += 50;
-
-                stars += 1;
-
-
-                // ส่งคะแนนขึ้น Firebase
-                if (
-                    typeof window.syncDataToServer ===
-                    'function'
-                ) {
-
-                    window.syncDataToServer(
-                        shopName,
-                        stars,
-                        gold
-                    );
-                }
-
-
                 currentCaseNum++;
-
 
                 loadCase();
 
             },
 
-            800
+            1000
         );
 
 
@@ -924,210 +1639,126 @@ function takeAction(
     }
 
 
-    // =========================
+    // ===============================
     // ตอบผิด
-    // =========================
+    // ===============================
 
     btnElement
         .classList
         .replace(
-            'btn-outline',
-            'btn-danger'
+            "btn-outline",
+            "btn-danger"
         );
 
 
-    if (shields > 0) {
+    gold =
+        Math.max(
+            0,
+            gold - 30
+        );
+
+
+    if (
+        shields >
+        0
+    ) {
 
         shields--;
 
 
         logCMD(
-            "CRITICAL FAILURE PREVENTED: INSURANCE SHIELD DEPLOYED.",
+            "INSURANCE SHIELD USED.",
             "warn"
-        );
-
-
-        showAlert(
-            "ระบบประกันภัย",
-            "🛡️ โล่ประกันทำงาน! คุณรอดจากการโดนหักพลังงาน",
-            "🛡️"
         );
 
     } else {
 
-        energy -= 20;
-
-
-        logCMD(
-            "INCORRECT FIX APPLIED. SYSTEM DAMAGED! (-20% ENERGY)",
-            "error"
-        );
+        energy =
+            Math.max(
+                0,
+                energy - 20
+            );
     }
 
 
-    // =========================
-    // พลังงานหมด
-    // =========================
-
-    if (energy <= 0) {
-
-        logCMD(
-            "FATAL ERROR: SYSTEM OFFLINE. REBOOTING...",
-            "error"
-        );
+    logCMD(
+        "INCORRECT DIAGNOSIS. CASE FAILED.",
+        "error"
+    );
 
 
-        let starLostMsg = "";
+    logCMD(
+        `ACCURACY: ${getAccuracy()}%`,
+        "warn"
+    );
 
 
-        if (stars > 0) {
+    updateUI();
 
-            stars -= 1;
-
-
-            starLostMsg =
-                "📉 คุณโดนหัก -1 ดาว เนื่องจากแก้ไขปัญหาผิดพลาดจนเครื่องพัง!";
+    syncLeaderboard();
 
 
-            logCMD(
-                "PENALTY APPLIED: -1 STAR RANK DOWN",
-                "error"
-            );
+    const feedback =
 
-        } else {
+        `❌ เคสนี้ตอบได้เพียง 1 ครั้ง
 
-            starLostMsg =
-                "📉 ดาวของคุณเป็น 0 อยู่แล้ว (ไม่ถูกหักเพิ่ม)";
-        }
+คุณจึงไม่สามารถสุ่มตอบข้ออื่นต่อได้
 
+🔎 หลักฐานสำคัญ:
+${currentCaseData.toolHint}
 
-        showAlert(
+✅ วิธีแก้ที่เหมาะสม:
+${currentCaseData.correct}
 
-            "ผู้ประเมินระบบ (ล้มเหลว)",
+💸 ค่าความเสียหาย: -$30
 
-            `💀 พลังงานหมด!
-ลูกค้าไม่พอใจอย่างมาก
-
-${starLostMsg}
-
-ระบบจะทำการรีบูตเริ่มกะใหม่ให้ทันที`,
-
-            "💀",
-
-            () => {
-
-                energy = 100;
-
-                currentCaseNum = 1;
+🎯 Accuracy ปัจจุบัน:
+${getAccuracy()}%`;
 
 
-                gamePool =
-                    masterCasePool
-                        .sort(
-                            () =>
-                                0.5 -
-                                Math.random()
-                        )
-                        .slice(
-                            0,
-                            maxCases
-                        );
+    showAlert(
 
+        "วิเคราะห์ไม่ถูกต้อง",
 
-                gold -= 10;
+        feedback,
 
+        "❌",
 
-                // Sync คะแนนหลังโดนหักดาว
-                if (
-                    typeof window.syncDataToServer ===
-                    'function'
-                ) {
+        () => {
 
-                    window.syncDataToServer(
-                        shopName,
-                        stars,
-                        gold
-                    );
-                }
+            if (
+                energy <=
+                0
+            ) {
 
-
-                document
-                    .getElementById(
-                        'cmd-terminal'
-                    )
-                    .innerHTML = '';
+                energy =
+                    100;
 
 
                 logCMD(
-                    "SYSTEM REBOOTED. NEW SHIFT STARTED.",
+                    "ENERGY RESTORED FOR NEXT CASE.",
                     "warn"
                 );
-
-
-                document
-                    .querySelectorAll(
-                        '.answer-btn'
-                    )
-                    .forEach(
-                        b =>
-                            b.disabled = false
-                    );
-
-
-                updateUI();
-
-                renderCase();
             }
-        );
 
 
-        return;
-    }
+            currentCaseNum++;
 
-
-    // =========================
-    // ยังมีพลังงาน
-    // =========================
-
-    setTimeout(
-        () => {
-
-            btnElement
-                .classList
-                .replace(
-                    'btn-danger',
-                    'btn-outline'
-                );
-
-
-            document
-                .querySelectorAll(
-                    '.answer-btn'
-                )
-                .forEach(
-                    b =>
-                        b.disabled = false
-                );
-
-
-            updateUI();
-
-        },
-
-        600
+            loadCase();
+        }
     );
 }
 
 
 // =====================================================
-// อัปเดต UI
+// Update UI
 // =====================================================
 
 function updateUI() {
 
     document
         .getElementById(
-            'display-shop-name'
+            "display-shop-name"
         )
         .innerText =
         shopName;
@@ -1135,7 +1766,7 @@ function updateUI() {
 
     document
         .getElementById(
-            'display-stars'
+            "display-stars"
         )
         .innerText =
         stars;
@@ -1143,7 +1774,7 @@ function updateUI() {
 
     document
         .getElementById(
-            'display-energy'
+            "display-energy"
         )
         .innerText =
         energy;
@@ -1151,7 +1782,7 @@ function updateUI() {
 
     document
         .getElementById(
-            'display-gold'
+            "display-gold"
         )
         .innerText =
         gold;
@@ -1159,7 +1790,7 @@ function updateUI() {
 
     document
         .getElementById(
-            'shop-gold'
+            "shop-gold"
         )
         .innerText =
         gold;
@@ -1167,55 +1798,55 @@ function updateUI() {
 
     document
         .getElementById(
-            'display-shield'
+            "display-shield"
         )
         .innerText =
         shields;
 
 
-    // =================================================
+    // ===============================
     // Rank
-    //
-    // Bronze       0-9
-    // Silver      10-14
-    // Gold        15-19
-    // Platinum    20-29
-    // Diamond     30-49
-    // Conqueror   50+
-    // =================================================
+    // ===============================
 
     let rank =
         "Bronze";
 
 
-    if (stars >= 50) {
+    if (
+        stars >=
+        50
+    ) {
 
         rank =
             "Conqueror";
 
     } else if (
-        stars >= 30
+        stars >=
+        30
     ) {
 
         rank =
             "Diamond";
 
     } else if (
-        stars >= 20
+        stars >=
+        20
     ) {
 
         rank =
             "Platinum";
 
     } else if (
-        stars >= 15
+        stars >=
+        15
     ) {
 
         rank =
             "Gold";
 
     } else if (
-        stars >= 10
+        stars >=
+        10
     ) {
 
         rank =
@@ -1225,7 +1856,7 @@ function updateUI() {
 
     document
         .getElementById(
-            'display-rank'
+            "display-rank"
         )
         .innerText =
         rank;
@@ -1239,19 +1870,22 @@ function updateUI() {
 window.toggleShop = function() {
 
     const shop =
-        document.getElementById(
-            'shop-screen'
+        document
+            .getElementById(
+                "shop-screen"
+            );
+
+
+    shop
+        .classList
+        .toggle(
+            "hidden"
         );
-
-
-    shop.classList.toggle(
-        'hidden'
-    );
 };
 
 
 // =====================================================
-// ซื้อของ
+// ซื้อสินค้า
 // =====================================================
 
 window.buyItem = function(
@@ -1260,7 +1894,10 @@ window.buyItem = function(
     val
 ) {
 
-    if (gold < price) {
+    if (
+        gold <
+        price
+    ) {
 
         showAlert(
             "ฝ่ายการเงิน",
@@ -1272,11 +1909,14 @@ window.buyItem = function(
     }
 
 
-    gold -= price;
+    gold -=
+        price;
 
 
-    // Energy
-    if (type === 'energy') {
+    if (
+        type ===
+        "energy"
+    ) {
 
         energy =
             Math.min(
@@ -1292,8 +1932,10 @@ window.buyItem = function(
     }
 
 
-    // Shield
-    if (type === 'shield') {
+    if (
+        type ===
+        "shield"
+    ) {
 
         shields++;
 
@@ -1305,41 +1947,43 @@ window.buyItem = function(
     }
 
 
-    // AI Diagnostic
-    if (type === 'ai') {
+    if (
+        type ===
+        "ai"
+    ) {
 
         logCMD(
-            "ITEM PURCHASED: AI DIAGNOSTIC APPLIED",
+            "AI DIAGNOSTIC APPLIED.",
             "warn"
         );
 
 
-        const btns =
+        const buttons =
             document
                 .querySelectorAll(
-                    '.answer-btn'
+                    ".answer-btn"
                 );
 
 
-        let removed = false;
+        let removed =
+            false;
 
 
-        btns.forEach(
-            b => {
+        buttons.forEach(
+            button => {
 
                 if (
                     !removed &&
-                    !b.disabled &&
-                    b.innerText !==
+                    button.innerText !==
                     currentCaseData.correct
                 ) {
 
-                    b.style.opacity =
-                        '0.3';
+                    button.style.display =
+                        "none";
 
 
-                    b.disabled =
-                        true;
+                    button.dataset.aiRemoved =
+                        "true";
 
 
                     removed =
@@ -1355,60 +1999,60 @@ window.buyItem = function(
 
     updateUI();
 
+    syncLeaderboard();
 
-    // ส่งเงินล่าสุดขึ้น Leaderboard
-    if (
-        typeof window.syncDataToServer ===
-        'function'
-    ) {
-
-        window.syncDataToServer(
-            shopName,
-            stars,
-            gold
-        );
-    }
+    updateAnswerLockState();
 };
 
 
 // =====================================================
-// ป้องกัน F12 / View Source / คลิกขวา
+// ป้องกันคลิกขวา / F12
 // =====================================================
 
 document.addEventListener(
-    'contextmenu',
+
+    "contextmenu",
+
     event =>
         event.preventDefault()
+
 );
 
 
 document.onkeydown =
-    function(e) {
+    function(
+        event
+    ) {
 
         if (
-            e.keyCode === 123
+            event.keyCode ===
+            123
         ) {
+
             return false;
         }
 
 
         if (
-            e.ctrlKey &&
-            e.shiftKey &&
+            event.ctrlKey &&
+            event.shiftKey &&
             (
-                e.keyCode === 73 ||
-                e.keyCode === 74 ||
-                e.keyCode === 67
+                event.keyCode === 73 ||
+                event.keyCode === 74 ||
+                event.keyCode === 67
             )
         ) {
+
             return false;
         }
 
 
         if (
-            e.ctrlKey &&
-            e.keyCode === 85
+            event.ctrlKey &&
+            event.keyCode ===
+            85
         ) {
+
             return false;
         }
     };
